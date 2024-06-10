@@ -1,0 +1,26 @@
+analyse_metric_task:
+  description: >
+    Analyse metrics of the {namespace} namespace from Prometheus and provide insights on the data.
+    The goal is to identify any anomalies to possibly run a diagnostic task if needed.
+  expected_output: >
+    A report with insights on the data and if a diagnostic task is needed.
+
+diagnose_issue_task:
+    description: >
+        Find the root cause of the anomaly.
+        Use the insights from the analyse_metric_task to identify the root cause.
+    expected_output: >
+        A diagnostic report with the root cause of the anomaly.
+
+provide_solution_task:
+    description: >
+        Find a solution to the root cause of the anomaly.
+        Use the insights from the diagnostic_task to find a solution.
+    expected_output: >
+        A report with the solution to the root cause of the anomaly.
+
+report_incident_task:
+    description: >
+        Create an incident report with the findings from the previous tasks.
+    expected_output: >
+        A complete incident report with the findings from the previous tasks.

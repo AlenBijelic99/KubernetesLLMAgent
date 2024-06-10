@@ -535,3 +535,21 @@ id,
 	}
 
 }
+
+export class AgentService {
+    /**
+     * Run Agent
+     * Launch the monitoring agent.
+     * @returns {Promise<Message>} Successful Response
+     * @throws ApiError
+     */
+    public static runAgent(): CancelablePromise<Message> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/agent/run',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+}

@@ -5,7 +5,7 @@ description = ""
 authors = ["Admin <admin@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<=3.13"
 uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
 fastapi = "^0.109.1"
 python-multipart = "^0.0.7"
@@ -26,9 +26,11 @@ bcrypt = "4.0.1"
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 pyjwt = "^2.8.0"
+crewai = {extras = ["tools"], version = "^0.30.11"}
+prometheus-api-client = "^0.5.5"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.3"
+pytest = "^8.0.0"
 mypy = "^1.8.0"
 ruff = "^0.2.2"
 pre-commit = "^3.6.2"
