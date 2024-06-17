@@ -1,4 +1,5 @@
 import { AgentService } from "../../client";
+import {Button} from "@chakra-ui/react";
 
 const RunAgentButton = () => {
     const handleClick = async () => {
@@ -11,7 +12,7 @@ const RunAgentButton = () => {
     };
 
     return (
-        <button onClick={handleClick}>Run Agent</button>
+        <Button colorScheme='teal' onClick={handleClick}>Run Agent</Button>
     );
 }
 
