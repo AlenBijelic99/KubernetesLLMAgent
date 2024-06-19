@@ -5,7 +5,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "80:80"
+      - "8080:80"
       - "8090:8080"
     # Duplicate the command from docker-compose.yml to add --api.insecure=true
     command:
@@ -48,7 +48,7 @@ services:
   adminer:
     restart: "no"
     ports:
-      - "8080:8080"
+      - "8081:8081"
 
   backend:
     restart: "no"
@@ -68,7 +68,7 @@ services:
     build:
       context: ./frontend
       args:
-        - VITE_API_URL=http://${DOMAIN?Variable not set}
+        - VITE_API_URL=http://${DOMAIN?Variable not set}:8080
         - NODE_ENV=development
 
 networks:
