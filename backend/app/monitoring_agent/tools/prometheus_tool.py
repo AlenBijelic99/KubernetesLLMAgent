@@ -22,6 +22,9 @@ def get_metrics_of_namespace(namespace: str) -> str:
     # Connect to Prometheus
     prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
 
+    if not prometheus.check_prometheus_connection():
+        return "Prometheus is not available"
+
     # Sanitize input to avoid injection
     if not is_valid_namespace(namespace):
         return "Invalid namespace. Only alphanumeric characters, dashes, and underscores are allowed."
@@ -42,5 +45,31 @@ def get_metrics_of_namespace(namespace: str) -> str:
 
     # Format the output
     result = "\n".join([f"{metric}: {value}" for metric, value in results.items()])
+
+    return result
+
+
+@tool("Execute Prometheus query")
+def execute_prometheus_query(query: str) -> str:
+    """Executes a custom Prometheus query and returns the result"""
+
+    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+
+    # Connect to Prometheus
+    prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
+
+    if not prometheus.check_prometheus_connection():
+        return "Prometheus is not available"
+
+    # Sanitize input to avoid injection
+    sanitized_query = re.sub(r'[^\w\s{}[\]:,=()<>-]', '', query)
+
+    # Execute the query
+    data = prometheus.custom_query(query=sanitized_query)
+    if not data:
+        return "No data found"
+
+    # Format the output
+    result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
 
     return result

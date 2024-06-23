@@ -1,9 +1,18 @@
 analyse_metric_task:
   description: >
-    Analyse metrics of the {namespace} namespace from Prometheus and provide insights on the data.
-    The goal is to identify any anomalies to possibly run a diagnostic task if needed.
+    Analyse the metrics of each pod, service, deployment from the {namespace} namespace in Prometheus, focusing on identifying trends, anomalies, and potential issues. Execute necessary queries to gather relevant data. Provide a comprehensive report based on this analysis.
   expected_output: >
-    A report with insights on the data and if a diagnostic task is needed.
+    A detailed report that includes:
+    - Identified trends and patterns in the data.
+    - Any detected anomalies or unusual behavior.
+    - Recommendations for potential diagnostic tasks or further investigation if needed.
+    - Clear, data-backed justifications for all insights and recommendations.
+
+execute_query_task:
+  description: >
+    Execute a custom Prometheus query to retrieve specific metrics needed for detailed analysis. Ensure the query is sanitized and valid.
+  expected_output: >
+    The result of the executed query, formatted as a clear and concise summary of the metrics retrieved.
 
 diagnose_issue_task:
     description: >

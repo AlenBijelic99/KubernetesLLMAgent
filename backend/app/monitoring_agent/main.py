@@ -1,4 +1,8 @@
+import logging
+
 from dotenv import load_dotenv
+
+from app.monitoring_agent.tools.kubernetes_tool import get_pod_names
 
 load_dotenv()
 
@@ -13,6 +17,9 @@ def run():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Starting the monitoring agent")
+    logging.info(get_pod_names('bookinfo'))
     run()
 
 # Example usage
