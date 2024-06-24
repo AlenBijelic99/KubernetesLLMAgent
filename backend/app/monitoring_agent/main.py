@@ -14,13 +14,13 @@ def run():
     namespaces = {
         'namespace': 'bookinfo'
     }
-    MonitoringAssistantCrew().crew().kickoff(inputs=namespaces)
+    try:
+        MonitoringAssistantCrew().crew().kickoff(inputs=namespaces)
+    except Exception as e:
+        logging.error(f"Error: {e}")
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Starting the monitoring agent")
-    logging.info(get_pod_names('bookinfo'))
     run()
 
 # Example usage

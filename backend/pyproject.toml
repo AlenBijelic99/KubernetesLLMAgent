@@ -26,7 +26,7 @@ bcrypt = "4.0.1"
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 pyjwt = "^2.8.0"
-crewai = {extras = ["tools"], version = "^0.30.11"}
+crewai = {extras = ["tools"], version = "^0.32.2"}
 prometheus-api-client = "^0.5.5"
 google-auth = "^2.30.0"
 google-auth-oauthlib = "^1.2.0"

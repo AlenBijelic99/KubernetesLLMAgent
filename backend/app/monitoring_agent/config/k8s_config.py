@@ -5,7 +5,13 @@ from kubernetes import client
 
 
 class KubernetesConfig:
+    """
+    Manage the configuration of the Kubernetes client
+    """
     def __init__(self, kube_host: str, credentials_path: str, scopes: list):
+        """
+        Initialize the Kubernetes configuration
+        """
         self.kube_host = kube_host
         self.credentials_path = credentials_path
         self.scopes = scopes
@@ -13,6 +19,9 @@ class KubernetesConfig:
         self.v1 = None
 
     def authenticate(self):
+        """
+        Authenticate with the Kubernetes cluster
+        """
         # Load the service account credentials
         credentials = service_account.Credentials.from_service_account_file(
             self.credentials_path, scopes=self.scopes
@@ -31,6 +40,9 @@ class KubernetesConfig:
         self.v1 = client.CoreV1Api()
 
     def get_client(self):
+        """
+        Singleton method to get the Kubernetes client
+        """
         if not self.v1:
             self.authenticate()
         return self.v1
