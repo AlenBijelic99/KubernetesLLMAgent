@@ -63,12 +63,18 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - KUBECONFIG_FILE=/root/.kube/config
+      - GOOGLE_APPLICATION_CREDENTIALS_FILE=/root/.kube/${GOOGLE_APPLICATION_CREDENTIALS_FILE?Variable not set}
 
+    volumes:
+      - kube-config:/root/.kube
     build:
       context: ./backend
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
     platform: linux/amd64 # Patch for M1 Mac
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
@@ -124,6 +130,12 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect,${STACK_NAME?Variable not set}-www-redirect
 volumes:
   app-db-data:
+  kube-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "C:/Users/Alen Bijelic/.kube"
 
 networks:
   traefik-public:
