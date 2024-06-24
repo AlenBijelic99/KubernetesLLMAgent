@@ -62,7 +62,7 @@ def execute_prometheus_query(query: str) -> str:
         return "Prometheus is not available"
 
     # Sanitize input to avoid injection
-    sanitized_query = re.sub(r'[^\w\s{}[\]:,=()<>-]', '', query)
+    sanitized_query = re.sub(r'[^\w\s{}[\]:,=()<>\'"]', '', query)
 
     # Execute the query
     data = prometheus.custom_query(query=sanitized_query)
