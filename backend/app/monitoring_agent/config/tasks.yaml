@@ -1,12 +1,15 @@
 analyse_metric_task:
   description: >
-    Analyse the metrics of each pod, service, deployment from the {namespace} namespace in Prometheus, focusing on identifying trends, anomalies, and potential issues. Execute necessary queries to gather relevant data. Provide a comprehensive report based on this analysis.
+    Analyse the metrics of each pod from the {namespace} namespace in Prometheus, focusing on identifying trends, anomalies, and potential issues. Execute necessary Prometheus queries (PromQL) to gather relevant data. Provide a comprehensive report based on this analysis. Decide whether further diagnostic tasks are needed based on the following criteria:
+      - CPU Usage: Trigger a diagnostic if the CPU usage for any pod exceeds 80% for more than 5 minutes.
+      - Memory Usage: Trigger a diagnostic if the memory usage for any pod exceeds 80% for more than 5 minutes.
+      - Disk Usage: Trigger a diagnostic if the disk usage for any pod exceeds 80% for more than 5 minutes.
   expected_output: >
     A detailed report that includes:
     - Identified trends and patterns in the data.
     - Any detected anomalies or unusual behavior.
-    - Recommendations for potential diagnostic tasks or further investigation if needed.
     - Clear, data-backed justifications for all insights and recommendations.
+    - A decision on whether further diagnostic tasks are needed.
 
 execute_query_task:
   description: >
