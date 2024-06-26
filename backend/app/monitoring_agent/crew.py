@@ -6,7 +6,7 @@ from crewai.project import CrewBase, agent, crew, task
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 
-from app.monitoring_agent.tools.kubernetes_tool import get_pod_names
+from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_pod_yaml
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
 load_dotenv()
@@ -31,6 +31,8 @@ class MonitoringAssistantCrew():
         self.tasks_config = load_yaml(self.tasks_config_path)
         self.llm = ChatOpenAI(model="gpt-4o", temperature=0, api_key=os.getenv("OPENAI_API_KEY"))
         self.get_pod_names = get_pod_names
+        self.get_pod_logs = get_pod_logs
+        self.get_pod_yaml = get_pod_yaml
         self.execute_prometheus_query = execute_prometheus_query
         self.agents = [
             self.metrics_analyser()

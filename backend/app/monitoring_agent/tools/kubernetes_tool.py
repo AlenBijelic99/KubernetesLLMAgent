@@ -27,3 +27,29 @@ def get_pod_names(namespace: str) -> list:
     except client.ApiException as e:
         logging.error(f"Exception when calling CoreV1Api->list_namespaced_pod: {e}")
         return f"Exception when calling CoreV1Api->list_namespaced_pod: {e}"
+
+
+@tool("Get logs from a pod in a namespace")
+def get_pod_logs(pod: str, namespace: str) -> str:
+    """Returns logs of a pod in the specified namespace."""
+    v1 = k8s_config.get_client()
+
+    try:
+        logs = v1.read_namespaced_pod_log(pod, namespace)
+        return logs
+    except client.ApiException as e:
+        logging.error(f"Exception when calling CoreV1Api->read_namespaced_pod_log: {e}")
+        return f"Exception when calling CoreV1Api->read_namespaced_pod_log: {e}"
+
+
+@tool("Get pod YAML configuration in a namespace")
+def get_pod_yaml(pod: str, namespace: str) -> str:
+    """Returns the YAML configuration of a pod in the specified namespace."""
+    v1 = k8s_config.get_client()
+
+    try:
+        pod = v1.read_namespaced_pod(pod, namespace)
+        return pod
+    except client.ApiException as e:
+        logging.error(f"Exception when calling CoreV1Api->read_namespaced_pod: {e}")
+        return f"Exception when calling CoreV1Api->read_namespaced_pod: {e}"
