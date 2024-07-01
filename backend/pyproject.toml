@@ -26,7 +26,6 @@ bcrypt = "4.0.1"
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 pyjwt = "^2.8.0"
-crewai = {extras = ["tools"], version = "^0.32.2"}
 prometheus-api-client = "^0.5.5"
 google-auth = "^2.30.0"
 google-auth-oauthlib = "^1.2.0"
@@ -34,6 +33,9 @@ google-auth-httplib2 = "^0.2.0"
 google-api-python-client = "^2.134.0"
 google-cloud-container = "^2.47.0"
 kubernetes = "^30.1.0"
+langgraph = "^0.1.4"
+langchain-core = "^0.2.10"
+langchain-openai = "^0.1.13"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
