@@ -1,7 +1,7 @@
 import logging
 import os
 
-from crewai_tools import tool
+from langchain_core.tools import tool
 from dotenv import load_dotenv
 from kubernetes import client
 
@@ -16,9 +16,9 @@ k8s_config = KubernetesConfig(
 )
 
 
-@tool("Get pod names in a namespace")
+@tool
 def get_pod_names(namespace: str) -> list:
-    """Returns a list of pod names in the specified namespace."""
+    """Get pods in given namespace. Returns a list of pod names in the specified namespace."""
     v1 = k8s_config.get_client()
 
     try:
@@ -29,9 +29,9 @@ def get_pod_names(namespace: str) -> list:
         return f"Exception when calling CoreV1Api->list_namespaced_pod: {e}"
 
 
-@tool("Get logs from a pod in a namespace")
+@tool
 def get_pod_logs(pod: str, namespace: str) -> str:
-    """Returns logs of a pod in the specified namespace."""
+    """ Get logs from a pod in a namespace. Returns logs of a pod in the specified namespace."""
     v1 = k8s_config.get_client()
 
     try:
@@ -42,9 +42,9 @@ def get_pod_logs(pod: str, namespace: str) -> str:
         return f"Exception when calling CoreV1Api->read_namespaced_pod_log: {e}"
 
 
-@tool("Get pod YAML configuration in a namespace")
+@tool
 def get_pod_yaml(pod: str, namespace: str) -> str:
-    """Returns the YAML configuration of a pod in the specified namespace."""
+    """Get pod YAML configuration in a namespace. Returns the YAML configuration of a pod in the specified namespace."""
     v1 = k8s_config.get_client()
 
     try:

@@ -1,4 +1,10 @@
 analyse_metric_task:
+  role: >
+    Prometheus metrics analyser
+  goal: >
+    Analyse metrics of an application deployed in a Kubernetes cluster using Prometheus, provide detailed insights and decide whether or not a diagnosis is necessary to resolve any probem.
+  backstory: >
+    A monitoring expert who can analyse metrics from Prometheus to derive accurate insights and recommendations.
   description: >
     Analyse the metrics of each pod from the {namespace} namespace in Prometheus, focusing on identifying trends, anomalies, and potential issues. Execute necessary Prometheus queries (PromQL) to gather relevant data. Provide a comprehensive report based on this analysis. Decide whether further diagnostic tasks are needed based on the following criteria:
       - CPU Usage: Trigger a diagnostic if the CPU usage for any pod exceeds 80% of its allocated CPU for the last 5 minutes.
@@ -10,29 +16,53 @@ analyse_metric_task:
     - Clear, data-backed justifications for all insights and recommendations.
     - Used tools, queries, methods and returned value.
     - A decision on whether further diagnostic tasks are needed.
-
-execute_query_task:
-  description: >
-    Execute a custom Prometheus query to retrieve specific metrics needed for detailed analysis. Ensure the query is sanitized and valid.
-  expected_output: >
-    The result of the executed query, formatted as a clear and concise summary of the metrics retrieved.
+  examples:
+    - user: "Get CPU usage for the past 5 minutes for all pods in the 'default' namespace."
+      tool: execute_prometheus_query
+      tool_input: 'sum(rate(container_cpu_usage_seconds_total{namespace="default"}[5m])) by (pod)'
+      tool_response: '{pod="pod1"}: 0.85\n{pod="pod2"}: 0.65'
+    - user: "Get memory usage for the past 5 minutes for all pods in the 'default' namespace."
+      tool: execute_prometheus_query
+      tool_input: 'sum(rate(container_memory_usage_bytes{namespace="default"}[5m])) by (pod)'
+      tool_response: '{pod="pod1"}: 80000000\n{pod="pod2"}: 65000000'
 
 diagnose_issue_task:
-    description: >
-        Find the root cause of the anomaly.
-        Use the insights from the analyse_metric_task to identify the root cause.
-    expected_output: >
-        A diagnostic report with the root cause of the anomaly.
+  role: >
+    Diagnostic expert
+  goal: >
+    Find the root cause of the anomaly.
+  backstory: >
+    A diagnostic expert who can find the root cause of the anomaly.
+  description: >
+    Find the root cause of the anomaly.
+    Use the insights from the analyse_metric_task to identify the root cause.
+  expected_output: >
+    A diagnostic report with the root cause of the anomaly.
+  examples:
 
 provide_solution_task:
-    description: >
-        Find a solution to the root cause of the anomaly.
-        Use the insights from the diagnostic_task to find a solution.
-    expected_output: >
-        A report with the solution to the root cause of the anomaly.
+  role: >
+    Solution expert
+  goal: >
+    Find solutions to the root cause of the anomaly.
+  backstory: >
+    A solution expert who can find solutions to the root cause of the anomaly.
+  description: >
+    Find a solution to the root cause of the anomaly.
+    Use the insights from the diagnostic_task to find a solution.
+  expected_output: >
+    A report with the solution to the root cause of the anomaly.
+  examples:
 
 report_incident_task:
-    description: >
-        Create an incident report with the findings from the previous tasks.
-    expected_output: >
-        A complete incident report with the findings from the previous tasks.
+  role: >
+    Incident reporter
+  goal: >
+    Create an incident report with the findings from the previous tasks.
+  backstory: >
+    An incident reporter who can create an incident report with the findings from the previous tasks.
+  description: >
+    Create an incident report with the findings from the previous tasks.
+  expected_output: >
+    A complete incident report with the findings from the previous tasks.
+  examples:
