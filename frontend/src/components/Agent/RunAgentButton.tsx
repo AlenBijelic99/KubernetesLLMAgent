@@ -1,13 +1,19 @@
 import {AgentService, WebsocketService} from "../../client";
 import {Box, Text, Button, useToast } from "@chakra-ui/react";
-import {useEffect, useState} from "react";
+import {useRef, useState} from "react";
 
 const RunAgentButton = () => {
     const toast = useToast();
     const [status, setStatus] = useState<String[]>([]);
+    const socketRef = useRef<WebSocket | null>(null);
 
-    useEffect(() => {
+    function openWebsocket() {
         const socket = WebsocketService.getWebSocket();
+        socketRef.current = socket;
+
+        socket.onopen = () => {
+            console.log("WebSocket connection opened.");
+        };
 
         socket.onmessage = (event) => {
             const message = event.data;
@@ -37,13 +43,11 @@ const RunAgentButton = () => {
                 isClosable: true,
             });
         };
-
-        return () => {
-            socket.close();
-        };
-    }, []);
+    }
 
     const handleClick = async () => {
+        openWebsocket();
+
         const agentPromise = AgentService.runAgent();
 
         toast.promise(agentPromise, {
@@ -82,6 +86,10 @@ const RunAgentButton = () => {
                 duration: 5000,
                 isClosable: true,
             });
+        } finally {
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
         }
     };
 
