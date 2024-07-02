@@ -22,7 +22,7 @@ tools = [get_pod_names, execute_prometheus_query, get_pod_logs]
 tool_node = ToolNode(tools)
 
 
-def run():
+async def run(manager):
     workflow = StateGraph(AgentState)
 
     workflow.add_node("metric_analyser", metric_analyser_node)
@@ -75,6 +75,8 @@ def run():
     # Afficher l'image (facultatif)
     image.show()
 
+    await manager.send_message("Agent started")
+
     events = graph.stream(
         {
             "messages": [
@@ -87,9 +89,8 @@ def run():
         {"recursion_limit": 150},
     )
     for s in events:
+        await manager.send_message(f"Step: {s}")
         print(s)
         print("----")
 
-
-if __name__ == "__main__":
-    run()
+    await manager.send_message("Agent finished successfully")

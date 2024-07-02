@@ -1,8 +1,37 @@
 import { AgentService } from "../../client";
-import { Button, useToast } from "@chakra-ui/react";
+import {Box, Text, Button, useToast } from "@chakra-ui/react";
+import {useEffect, useState} from "react";
 
 const RunAgentButton = () => {
     const toast = useToast();
+    const [status, setStatus] = useState<String[]>([]);
+
+    useEffect(() => {
+        const socket = new WebSocket('ws://localhost:8080/api/v1/agent/ws');
+
+        socket.onmessage = (event) => {
+            const message = event.data;
+            setStatus((prevStatus) => [...prevStatus, message]);
+        };
+
+        socket.onerror = (event) => {
+            let errorMessage = "An error occurred with the WebSocket connection";
+            if (event instanceof ErrorEvent) {
+                errorMessage = event.message;
+            }
+            toast({
+                title: "WebSocket Error",
+                description: errorMessage,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        };
+
+        return () => {
+            socket.close();
+        };
+    }, [toast]);
 
     const handleClick = async () => {
         const agentPromise = AgentService.runAgent();
@@ -47,7 +76,14 @@ const RunAgentButton = () => {
     };
 
     return (
-        <Button colorScheme='teal' onClick={handleClick}>Run Agent</Button>
+        <>
+            <Button colorScheme='teal' onClick={handleClick}>Run Agent</Button>
+            <Box mt={4}>
+                {status.map((message, index) => (
+                    <Text key={index}>{message}</Text>
+                ))}
+            </Box>
+        </>
     );
 }
 
