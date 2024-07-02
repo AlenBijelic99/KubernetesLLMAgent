@@ -1,7 +1,9 @@
 import io
+import logging
 
 from PIL import Image
 from dotenv import load_dotenv
+from kubernetes import client
 from langchain_core.messages import HumanMessage
 from langgraph.constants import END
 from langgraph.graph import StateGraph
@@ -11,12 +13,12 @@ from app.monitoring_agent.agent_nodes import metric_analyser_node, diagnostic_no
     incident_reporter_node
 from app.monitoring_agent.edge import router
 from app.monitoring_agent.graph import AgentState
-from app.monitoring_agent.tools.kubernetes_tool import get_pod_names
+from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
 load_dotenv()
 
-tools = [get_pod_names, execute_prometheus_query]
+tools = [get_pod_names, execute_prometheus_query, get_pod_logs]
 tool_node = ToolNode(tools)
 
 
@@ -77,7 +79,7 @@ def run():
         {
             "messages": [
                 HumanMessage(
-                    content="Check the metrics for all pods in the 'bookinfo' namespace."
+                    content="Check the metrics for all pods in the 'boutique' namespace."
                 )
             ],
         },

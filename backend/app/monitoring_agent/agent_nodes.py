@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 from langchain_openai import ChatOpenAI
 
 from app.monitoring_agent.agent import create_agent
-from app.monitoring_agent.tools.kubernetes_tool import get_pod_names
+from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -51,7 +51,7 @@ metric_analyser_node = functools.partial(agent_node, agent=metric_analyser_agent
 
 diagnostic_agent = create_agent(
     llm,
-    [],
+    [get_pod_logs],
     system_message=parse_config(tasks_config["diagnose_issue_task"]),
 )
 diagnostic_node = functools.partial(agent_node, agent=diagnostic_agent, name="diagnostic")

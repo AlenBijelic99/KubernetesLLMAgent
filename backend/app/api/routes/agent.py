@@ -10,6 +10,6 @@ router = APIRouter()
 async def run_agent():
     try:
         run()
-        return {"message": "Agent started successfully"}
+        return {"message": "Agent runned successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
