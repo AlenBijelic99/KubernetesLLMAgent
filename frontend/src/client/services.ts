@@ -553,3 +553,9 @@ export class AgentService {
         });
     }
 }
+
+export class WebsocketService {
+	public static getWebSocket(): WebSocket {
+		return new WebSocket('ws://localhost:8080/ws');
+	}
+}

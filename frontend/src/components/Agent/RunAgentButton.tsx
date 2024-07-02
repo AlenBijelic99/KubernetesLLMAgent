@@ -1,4 +1,4 @@
-import { AgentService } from "../../client";
+import {AgentService, WebsocketService} from "../../client";
 import {Box, Text, Button, useToast } from "@chakra-ui/react";
 import {useEffect, useState} from "react";
 
@@ -7,7 +7,7 @@ const RunAgentButton = () => {
     const [status, setStatus] = useState<String[]>([]);
 
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:8080/api/v1/agent/ws');
+        const socket = WebsocketService.getWebSocket();
 
         socket.onmessage = (event) => {
             const message = event.data;
@@ -28,10 +28,20 @@ const RunAgentButton = () => {
             });
         };
 
+        socket.onclose = () => {
+            toast({
+                title: "WebSocket Closed",
+                description: "WebSocket connection was closed.",
+                status: "warning",
+                duration: 5000,
+                isClosable: true,
+            });
+        };
+
         return () => {
             socket.close();
         };
-    }, [toast]);
+    }, []);
 
     const handleClick = async () => {
         const agentPromise = AgentService.runAgent();
