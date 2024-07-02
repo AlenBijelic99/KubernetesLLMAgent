@@ -1,5 +1,6 @@
 import io
 import logging
+from asyncio import sleep
 
 from PIL import Image
 from dotenv import load_dotenv
@@ -49,10 +50,6 @@ async def run(manager):
 
     workflow.add_conditional_edges(
         "call_tool",
-        # Each agent node updates the 'sender' field
-        # the tool calling node does not, meaning
-        # this edge will route back to the original agent
-        # who invoked the tool
         lambda x: x["sender"],
         {
             "metric_analyser": "metric_analyser",
@@ -63,21 +60,12 @@ async def run(manager):
     workflow.set_entry_point("metric_analyser")
     graph = workflow.compile()
 
-    # Générer l'image en mémoire
     img_bytes = graph.get_graph(xray=1).draw_mermaid_png()
-
-    # Ouvrir l'image en utilisant PIL
     image = Image.open(io.BytesIO(img_bytes))
-
-    # Sauvegarder l'image sur le disque
     image.save("graph.png")
-
-    # Afficher l'image (facultatif)
     image.show()
 
-    await manager.send_message("Agent started")
-
-    events = graph.stream(
+    async for event in graph.astream(
         {
             "messages": [
                 HumanMessage(
@@ -85,12 +73,10 @@ async def run(manager):
                 )
             ],
         },
-        # Maximum number of steps to take in the graph
-        {"recursion_limit": 150},
-    )
-    for s in events:
-        await manager.send_message(f"Step: {s}")
-        print(s)
-        print("----")
+        stream_mode="updates"
+    ):
+        await manager.send_json(f"{event}")
 
-    await manager.send_message("Agent finished successfully")
+    await manager.send_json("Agent finished successfully")
+    logging.warning("Sent: Agent finished successfully")
+

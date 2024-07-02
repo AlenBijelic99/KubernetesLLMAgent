@@ -4,10 +4,10 @@ import {useRef, useState} from "react";
 
 const RunAgentButton = () => {
     const toast = useToast();
-    const [status, setStatus] = useState<String[]>([]);
+    const [status, setStatus] = useState<any[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
 
-    function openWebsocket() {
+    const handleClick = async () => {
         const socket = WebsocketService.getWebSocket();
         socketRef.current = socket;
 
@@ -16,8 +16,13 @@ const RunAgentButton = () => {
         };
 
         socket.onmessage = (event) => {
-            const message = event.data;
-            setStatus((prevStatus) => [...prevStatus, message]);
+            try {
+                const message = JSON.parse(event.data);
+                console.log("Received message:", message);
+                setStatus((prevStatus) => [...prevStatus, message]);
+            } catch (error) {
+                console.error("Error parsing JSON:", error);
+            }
         };
 
         socket.onerror = (event) => {
@@ -43,10 +48,6 @@ const RunAgentButton = () => {
                 isClosable: true,
             });
         };
-    }
-
-    const handleClick = async () => {
-        openWebsocket();
 
         const agentPromise = AgentService.runAgent();
 
@@ -98,7 +99,7 @@ const RunAgentButton = () => {
             <Button colorScheme='teal' onClick={handleClick}>Run Agent</Button>
             <Box mt={4}>
                 {status.map((message, index) => (
-                    <Text key={index}>{message}</Text>
+                    <Text key={index}>{JSON.stringify(message)}</Text>
                 ))}
             </Box>
         </>
