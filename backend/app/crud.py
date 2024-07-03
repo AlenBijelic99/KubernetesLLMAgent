@@ -1,9 +1,11 @@
-from typing import Any
+import datetime
+import logging
+from typing import Any, Sequence
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Event, AgentRun
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -51,3 +53,33 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: int) -> Item
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_run(session: Session, status: str = "running") -> AgentRun:
+    try:
+        run = AgentRun(status=status)
+        session.add(run)
+        session.commit()
+        session.refresh(run)
+        return run
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        raise e
+
+
+def create_event(session: Session, run_id: int, event_data: dict) -> Event:
+    logging.warning(f"Creating event: {event_data}")
+    event = Event(
+        event_data=event_data,
+        run_id=run_id,
+        inserted_at=datetime.datetime.now()
+    )
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event
+
+
+def get_run_events(session: Session, run_id: int) -> Sequence[Event]:
+    statement = select(Event).where(Event.run_id == run_id)
+    return session.exec(statement).all()

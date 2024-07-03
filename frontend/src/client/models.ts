@@ -130,11 +130,10 @@ export type ValidationError = {
 	type: string;
 };
 
-export interface LGMessage {
+export interface Event {
 	id?: number;
-	message_type: string;
-	content: string;
-	tool_calls?: string;
+	event_data: { [key: string]: any };
+	inserted_at: string;
 	run_id?: number;
 }
 
@@ -142,13 +141,14 @@ export interface AgentRun {
 	id?: number;
 	start_time: string;
 	status: string;
-	messages?: LGMessage[];
+	events?: Event[];
 }
 
 export interface AgentRunPublic {
-	id?: number;
+	id: number;
 	start_time: string;
 	status: string;
+	events: Event[];
 }
 
 export interface AgentRunsPublic {
