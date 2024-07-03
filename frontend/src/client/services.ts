@@ -2,7 +2,24 @@ import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
 
-import type { Body_login_login_access_token,Message,NewPassword,Token,UserPublic,UpdatePassword,UserCreate,UserRegister,UsersPublic,UserUpdate,UserUpdateMe,ItemCreate,ItemPublic,ItemsPublic,ItemUpdate } from './models';
+import type {
+	Body_login_login_access_token,
+	Message,
+	NewPassword,
+	Token,
+	UserPublic,
+	UpdatePassword,
+	UserCreate,
+	UserRegister,
+	UsersPublic,
+	UserUpdate,
+	UserUpdateMe,
+	ItemCreate,
+	ItemPublic,
+	ItemsPublic,
+	ItemUpdate,
+	AgentRun
+} from './models';
 
 export type TDataLoginAccessToken = {
                 formData: Body_login_login_access_token
@@ -552,6 +569,16 @@ export class AgentService {
             },
         });
     }
+
+	public static getAgentRuns(): CancelablePromise<AgentRun[]> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: '/api/v1/agent/runs',
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
 }
 
 export class WebsocketService {

@@ -124,7 +124,7 @@ class LGMessageBase(SQLModel):
 
 class LGMessage(LGMessageBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    run_id: Optional[int] = Field(default=None, foreign_key="run.id")
+    run_id: Optional[int] = Field(default=None, foreign_key="agentrun.id")
     run: Optional["AgentRun"] = Relationship(back_populates="messages")
 
 
@@ -139,5 +139,18 @@ class AgentRunBase(SQLModel):
 
 
 class AgentRun(AgentRunBase, table=True):
+    __tablename__ = "agentrun"
     id: Optional[int] = Field(default=None, primary_key=True)
     messages: List[LGMessage] = Relationship(back_populates="run")
+
+
+class AgentRunPublic(SQLModel):
+    id: int
+    start_time: datetime
+    status: str
+    messages: List[LGMessageBase]
+
+
+class AgentRunsPublic(SQLModel):
+    data: List[AgentRunPublic]
+    count: int
