@@ -1,3 +1,6 @@
+from datetime import datetime
+from typing import List, Optional
+
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -111,3 +114,30 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str
+
+
+class LGMessageBase(SQLModel):
+    message_type: str = Field(index=True)
+    content: str
+    tool_calls: Optional[str] = None
+
+
+class LGMessage(LGMessageBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    run_id: Optional[int] = Field(default=None, foreign_key="run.id")
+    run: Optional["AgentRun"] = Relationship(back_populates="messages")
+
+
+class ToolCall(SQLModel):
+    function_name: str
+    arguments: str
+
+
+class AgentRunBase(SQLModel):
+    start_time: datetime
+    status: str
+
+
+class AgentRun(AgentRunBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    messages: List[LGMessage] = Relationship(back_populates="run")
