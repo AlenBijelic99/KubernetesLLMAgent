@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 
+from sqlalchemy.orm import declared_attr
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -116,21 +117,38 @@ class NewPassword(SQLModel):
     new_password: str
 
 
-class LGMessageBase(SQLModel):
-    message_type: str = Field(index=True)
-    content: str
-    tool_calls: Optional[str] = None
-
-
-class LGMessage(LGMessageBase, table=True):
+class ToolCall(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    run_id: Optional[int] = Field(default=None, foreign_key="agentrun.id")
-    run: Optional["AgentRun"] = Relationship(back_populates="messages")
-
-
-class ToolCall(SQLModel):
     function_name: str
     arguments: str
+    ai_message_id: Optional[int] = Field(default=None, foreign_key="message.id")
+
+
+class MessageBase(SQLModel):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    message_type: str = Field(index=True)
+    content: str
+    run_id: Optional[int] = Field(default=None, foreign_key="agentrun.id")
+    run: Optional["AgentRun"] = Relationship(back_populates="messages")
+    name: Optional[str] = None
+    tool_call_id: Optional[str] = None
+
+    @declared_attr
+    def __tablename__(cls):
+        return "message"
+
+
+class HumanMessage(MessageBase, table=True):
+    __mapper_args__ = {'polymorphic_identity': 'human_message'}
+
+
+class ToolMessage(MessageBase, table=True):
+    __mapper_args__ = {'polymorphic_identity': 'tool_message'}
+
+
+class AIMessage(MessageBase, table=True):
+    __mapper_args__ = {'polymorphic_identity': 'ai_message'}
+    tool_calls: List[ToolCall] = Relationship(back_populates="ai_message")
 
 
 class AgentRunBase(SQLModel):
@@ -139,16 +157,15 @@ class AgentRunBase(SQLModel):
 
 
 class AgentRun(AgentRunBase, table=True):
-    __tablename__ = "agentrun"
     id: Optional[int] = Field(default=None, primary_key=True)
-    messages: List[LGMessage] = Relationship(back_populates="run")
+    messages: List[MessageBase] = Relationship(back_populates="run")
 
 
 class AgentRunPublic(SQLModel):
     id: int
     start_time: datetime
     status: str
-    messages: List[LGMessageBase]
+    messages: List[MessageBase]
 
 
 class AgentRunsPublic(SQLModel):
