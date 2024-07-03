@@ -119,7 +119,7 @@ class NewPassword(SQLModel):
 
 
 class AgentRunBase(SQLModel):
-    start_time: datetime
+    start_time: datetime = Field(default_factory=datetime.utcnow)
     status: str
 
 
