@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router"
 
 import useAuth from "../../hooks/useAuth"
 import RunAgentButton from "../../components/Agent/RunAgentButton.tsx";
-import RunList from "../../components/Agent/RunList.tsx";
+import RunsTable from "../../components/Agent/RunsTable.tsx";
 import {useEffect, useState} from "react";
-import {AgentRun, AgentService} from "../../client";
+import {AgentRunPublic, AgentService} from "../../client";
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -13,20 +13,20 @@ export const Route = createFileRoute("/_layout/")({
 
 function Dashboard() {
   const { user: currentUser } = useAuth()
-  const [runs, setRuns] = useState<AgentRun[]>([])
+  const [runs, setRuns] = useState<AgentRunPublic[]>([]);
 
   useEffect(() => {
     const fetchRuns = async () => {
       try {
         const data = await AgentService.getAgentRuns();
-        setRuns(data);
+        setRuns(data.data);
       } catch (error) {
         console.error("Failed to fetch agent runs", error);
       }
     };
 
     fetchRuns();
-  }, [])
+  }, []);
 
   return (
     <>
@@ -37,7 +37,7 @@ function Dashboard() {
           </Text>
           <Text>Welcome back, nice to see you again!</Text>
           <RunAgentButton />
-          <RunList runs={runs} />
+          <RunsTable runs={runs} />
         </Box>
       </Container>
     </>

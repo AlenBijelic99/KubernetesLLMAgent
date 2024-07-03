@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, FastAPI
-from sqlmodel import select
+from sqlmodel import select, desc
 
 from app.api.deps import SessionDep
 from app.models import AgentRun, AgentRunsPublic
@@ -23,10 +23,10 @@ async def run_agent():
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("runs", response_model=AgentRunsPublic)
-async def get_runs(session: SessionDep):
+@router.get("/runs", response_model=AgentRunsPublic)
+async def get_runs(session: SessionDep) -> AgentRunsPublic:
     logging.warning("Getting runs")
-    runs = session.exec(select(AgentRun)).all()
+    runs = session.exec(select(AgentRun).order_by(desc(AgentRun.start_time))).all()
     return AgentRunsPublic(data=runs, count=len(runs))
 
 

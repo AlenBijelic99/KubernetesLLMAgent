@@ -2,7 +2,7 @@ import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
 
-import type {
+import {
 	Body_login_login_access_token,
 	Message,
 	NewPassword,
@@ -18,7 +18,7 @@ import type {
 	ItemPublic,
 	ItemsPublic,
 	ItemUpdate,
-	AgentRun
+	AgentRunsPublic
 } from './models';
 
 export type TDataLoginAccessToken = {
@@ -570,7 +570,7 @@ export class AgentService {
         });
     }
 
-	public static getAgentRuns(): CancelablePromise<AgentRun[]> {
+	public static getAgentRuns(): CancelablePromise<AgentRunsPublic> {
 		return __request(OpenAPI, {
 			method: 'GET',
 			url: '/api/v1/agent/runs',

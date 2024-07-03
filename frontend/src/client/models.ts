@@ -144,3 +144,14 @@ export interface AgentRun {
 	status: string;
 	messages?: LGMessage[];
 }
+
+export interface AgentRunPublic {
+	id?: number;
+	start_time: string;
+	status: string;
+}
+
+export interface AgentRunsPublic {
+	data: AgentRunPublic[];
+	count: number;
+}
