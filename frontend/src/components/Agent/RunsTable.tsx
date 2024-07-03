@@ -8,14 +8,9 @@ import {
     Thead,
     Tr
 } from "@chakra-ui/react";
-import {AgentRunPublic} from "../../client";
 import {CheckCircleIcon, WarningIcon} from "@chakra-ui/icons";
 
-interface RunListProps {
-    runs: AgentRunPublic[];
-}
-
-const RunsTable = ({runs}: RunListProps) => {
+const RunsTable = ({runs, onSelectRun}: any) => {
     return (
         <TableContainer>
             <Table variant='simple'>
@@ -26,8 +21,8 @@ const RunsTable = ({runs}: RunListProps) => {
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {runs.map((run) => (
-                        <Tr key={run.id}>
+                    {runs.map((run: any) => (
+                        <Tr key={run.id} onClick={() => onSelectRun(run)} _hover={{cursor: "pointer"}}>
                             <Td>
                                 {run.status === 'failed' ? (
                                     <WarningIcon color='red.500' />
