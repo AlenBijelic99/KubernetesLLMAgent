@@ -58,14 +58,14 @@ diagnostic_node = functools.partial(agent_node, agent=diagnostic_agent, name="di
 
 solution_agent = create_agent(
     llm,
-    [],
+    [execute_prometheus_query],
     system_message=parse_config(tasks_config["provide_solution_task"]),
 )
 solution_node = functools.partial(agent_node, agent=solution_agent, name="solution")
 
 incident_reporter_agent = create_agent(
     llm,
-    [],
+    [execute_prometheus_query],
     system_message=parse_config(tasks_config["report_incident_task"]),
 )
 incident_reporter_node = functools.partial(agent_node, agent=incident_reporter_agent, name="incident_reporter")

@@ -156,11 +156,18 @@ async def run(manager, session: SessionDep, run_id: int):
             inserted_event = create_event(session, run_id, json_event)
             await manager.send_json(json_event)
 
-        # Set status of run to "finished" in the database
         set_run_status(session, run_id, "finished")
 
     except Exception as e:
-        # Set status of run to "finished" in the database
+        print("Exception details : ", e.__dict__)
+        failed_event_info = {
+            "type": "Error",
+            "error": str(e),
+            "event": event_to_json(event) if 'event' in locals() else None
+        }
+        create_event(session, run_id, failed_event_info)
+
+        # Set status of run to "failed" in the database
         set_run_status(session, run_id, "failed")
 
         logging.error(f"Error: {e}")
