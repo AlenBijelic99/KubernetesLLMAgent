@@ -51,7 +51,7 @@ metric_analyser_node = functools.partial(agent_node, agent=metric_analyser_agent
 
 diagnostic_agent = create_agent(
     llm,
-    [get_pod_logs],
+    [execute_prometheus_query],
     system_message=parse_config(tasks_config["diagnose_issue_task"]),
 )
 diagnostic_node = functools.partial(agent_node, agent=diagnostic_agent, name="diagnostic")

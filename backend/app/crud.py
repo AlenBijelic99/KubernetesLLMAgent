@@ -83,3 +83,12 @@ def create_event(session: Session, run_id: int, event_data: dict) -> Event:
 def get_run_events(session: Session, run_id: int) -> Sequence[Event]:
     statement = select(Event).where(Event.run_id == run_id)
     return session.exec(statement).all()
+
+
+def set_run_status(session: Session, run_id: int, status: str) -> AgentRun:
+    run = session.get(AgentRun, run_id)
+    run.status = status
+    session.add(run)
+    session.commit()
+    session.refresh(run)
+    return run

@@ -14,7 +14,7 @@ from langgraph.prebuilt import ToolNode
 from sqlmodel import Session
 
 from app.api.deps import SessionDep
-from app.crud import create_event
+from app.crud import create_event, set_run_status
 from app.monitoring_agent.agent_nodes import metric_analyser_node, diagnostic_node, solution_node, \
     incident_reporter_node
 from app.monitoring_agent.edge import router
@@ -83,35 +83,40 @@ def generate_graph():
     workflow = StateGraph(AgentState)
 
     workflow.add_node("metric_analyser", metric_analyser_node)
-    """workflow.add_node("diagnostic", diagnostic_node)
+    workflow.add_node("diagnostic", diagnostic_node)
     workflow.add_node("solution", solution_node)
-    workflow.add_node("incident_reporter", incident_reporter_node)"""
+    workflow.add_node("incident_reporter", incident_reporter_node)
     workflow.add_node("call_tool", tool_node)
 
     workflow.add_conditional_edges(
         "metric_analyser",
         router,
-        {"continue": END, "call_tool": "call_tool", "__end__": END},
+        {"continue": "diagnostic", "call_tool": "call_tool", "__end__": "incident_reporter"},
     )
-    """
+
     workflow.add_conditional_edges(
         "diagnostic",
         router,
-        {"continue": "solution", "call_tool": "call_tool", "__end__": END},
+        {"continue": "solution", "call_tool": "call_tool", "__end__": "incident_reporter"},
     )
     workflow.add_conditional_edges(
         "solution",
         router,
-        {"continue": "incident_reporter", "call_tool": "call_tool", "__end__": END},
-    )"""
+        {"continue": "incident_reporter", "call_tool": "call_tool", "__end__": "incident_reporter"},
+    )
 
     workflow.add_conditional_edges(
         "call_tool",
         lambda x: x["sender"],
         {
             "metric_analyser": "metric_analyser",
+            "diagnostic": "diagnostic",
+            "solution": "solution",
         },
     )
+
+    workflow.add_edge("incident_reporter", END)
+
     workflow.set_entry_point("metric_analyser")
 
     graph = workflow.compile()
@@ -127,52 +132,39 @@ def export_graph_image(graph):
 
 
 async def run(manager, session: SessionDep, run_id: int):
-    # Create the graph with full workflow
-    graph = generate_graph()
+    try:
+        # Create the graph with full workflow
+        graph = generate_graph()
 
-    # Export the graph image
-    export_graph_image(graph)
+        # Export the graph image
+        export_graph_image(graph)
 
-    async for event in graph.astream(
-            {
-                "messages": [
-                    HumanMessage(
-                        content="Check the metrics for all pods in the 'boutique' namespace."
-                    )
-                ],
-            },
-            stream_mode="updates"
-    ):
-        try:
+        async for event in graph.astream(
+                {
+                    "messages": [
+                        HumanMessage(
+                            content="Check the metrics for all pods in the 'boutique' namespace."
+                        )
+                    ],
+                },
+                stream_mode="updates"
+        ):
             print(event)
-            """
-            extracted_info = []
-
-            def find_messages(d):
-                for key, value in d.items():
-                    if isinstance(value, list):
-                        for item in value:
-                            if isinstance(item, (HumanMessage, AIMessage, ToolMessage)):
-                                extracted_info.append(extract_message_info(item))
-                            elif isinstance(item, dict):
-                                find_messages(item)
-                    elif isinstance(value, dict):
-                        find_messages(value)
-
-            find_messages(event)
-
-            for message_info in extracted_info:
-                await manager.send_json(message_info)
-                logging.error(f"Message extr: {message_info}")
-            """
 
             json_event = event_to_json(event)
 
             inserted_event = create_event(session, run_id, json_event)
             await manager.send_json(json_event)
 
-        except Exception as e:
-            logging.error(f"Error: {e}")
-            await manager.send_json({"error": str(e)})
+        # Set status of run to "finished" in the database
+        set_run_status(session, run_id, "finished")
 
-    manager.delete_current_run_json()
+    except Exception as e:
+        # Set status of run to "finished" in the database
+        set_run_status(session, run_id, "failed")
+
+        logging.error(f"Error: {e}")
+        await manager.send_json({"error": str(e)})
+        raise e
+    finally:
+        await manager.delete_current_run_json()
