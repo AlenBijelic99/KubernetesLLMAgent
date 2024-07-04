@@ -1,19 +1,18 @@
-import {Box, Container, Grid, GridItem, Text} from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
-
-import useAuth from "../../hooks/useAuth"
-import RunAgentButton from "../../components/Agent/RunAgentButton.tsx";
-import RunsTable from "../../components/Agent/RunsTable.tsx";
-import {useEffect, useState} from "react";
-import {AgentRunPublic, AgentService} from "../../client";
-import RunAgentStepper from "../../components/Agent/RunAgentStepper.tsx";
+import { Box, Container, Grid, GridItem, Text } from "@chakra-ui/react";
+import { createFileRoute } from "@tanstack/react-router";
+import useAuth from "../../hooks/useAuth";
+import RunAgentButton from "../../components/Agent/RunAgentButton";
+import RunsTable from "../../components/Agent/RunsTable";
+import { useEffect, useState } from "react";
+import { AgentRunPublic, AgentService } from "../../client";
+import RunAgentStepper from "../../components/Agent/RunAgentStepper";
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
-})
+});
 
 function Dashboard() {
-  const { user: currentUser } = useAuth()
+  const { user: currentUser } = useAuth();
   const [runs, setRuns] = useState<AgentRunPublic[]>([]);
   const [selectedRun, setSelectedRun] = useState<AgentRunPublic | null>(null);
 
@@ -31,7 +30,6 @@ function Dashboard() {
   }, []);
 
   return (
-    <>
       <Container maxW="full">
         <Box pt={12} m={4}>
           <Text fontSize="2xl">
@@ -55,6 +53,7 @@ function Dashboard() {
           </Grid>
         </Box>
       </Container>
-    </>
-  )
+  );
 }
+
+export default Dashboard;
