@@ -3,9 +3,9 @@ import os
 
 import yaml
 from langchain_core.messages import AIMessage, ToolMessage
-from langchain_openai import ChatOpenAI
 
 from app.monitoring_agent.agent import create_agent
+from app.monitoring_agent.llm import get_llm
 from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
@@ -40,7 +40,7 @@ def agent_node(state, agent, name):
     }
 
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+llm = get_llm()
 
 metric_analyser_agent = create_agent(
     llm,
