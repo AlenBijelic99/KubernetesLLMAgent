@@ -10,12 +10,11 @@ analyse_metric_task:
       - CPU Usage: Trigger a diagnostic if the CPU usage for any pod exceeds 80% of its allocated CPU for the last 5 minutes.
       - Memory Usage: Trigger a diagnostic if the memory usage for any pod exceeds 80% of its allocated memory for the last 5 minutes.
   expected_output: >
-    A detailed report that includes:
+    A brief report that includes:
     - Identified trends and patterns in the data.
     - Any detected anomalies or unusual behavior.
     - Clear, data-backed justifications for all insights and recommendations.
-    - Used tools, queries, methods and returned value.
-    - A decision on whether further diagnostic tasks are needed.
+    - A decision on whether further diagnostic tasks are needed based on the criteria mentioned above.
   examples:
     - user: "Get CPU usage for the past 5 minutes for all pods in the 'default' namespace."
       tool: execute_prometheus_query

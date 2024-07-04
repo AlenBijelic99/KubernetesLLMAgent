@@ -37,11 +37,11 @@ function Dashboard() {
           </Text>
           <Text>Welcome back, nice to see you again!</Text>
           <RunAgentButton />
-          <Grid templateColumns='repeat(5, 1fr)'>
-            <GridItem w='100%' colSpan={2} h='10' >
+          <Grid templateColumns="repeat(5, 1fr)" gap={4}>
+            <GridItem w="100%" colSpan={2}>
               <RunsTable runs={runs} onSelectRun={setSelectedRun} />
             </GridItem>
-            <GridItem w='100%' colStart={3} colEnd={6}>
+            <GridItem w="100%" colSpan={3}>
               {runs.length === 0 ? (
                   <Text>Please run the agent to show element</Text>
               ) : selectedRun ? (
