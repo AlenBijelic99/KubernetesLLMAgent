@@ -36,10 +36,17 @@ const groupEvents = (events: Event[]) => {
         'incident_reporter': []
     };
 
+    let lastKey: string | null = null;
+
     events.forEach(event => {
         const key = Object.keys(event.event_data)[0];
-        if (groups[key]) {
-            groups[key].push(event);
+        if (key !== 'call_tool') {
+            if (groups[key]) {
+                groups[key].push(event);
+                lastKey = key;
+            }
+        } else if (lastKey && groups[lastKey]) {
+            groups[lastKey].push(event);
         }
     });
 
@@ -108,6 +115,7 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                                         bottom="0"
                                         left="0"
                                         right="0"
+                                        width="100%"
                                         height="50px"
                                         display="flex"
                                         justifyContent="center"
