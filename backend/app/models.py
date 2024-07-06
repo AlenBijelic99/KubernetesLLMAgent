@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from typing import List, Optional, Union
 
@@ -126,24 +127,30 @@ class AgentRunBase(SQLModel):
 class EventBase(SQLModel):
     event_data: dict = Field(sa_column=Column(JSON), default={})
     inserted_at: datetime = Field(default_factory=datetime.utcnow)
-    run_id: Optional[int] = Field(default=None, foreign_key="agentrun.id")
+    run_id: Optional[uuid.UUID] = Field(default=None, foreign_key="agentrun.id")
 
 
 class Event(EventBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
     run: Optional["AgentRun"] = Relationship(back_populates="events")
 
 
 class AgentRun(AgentRunBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
     events: List[Event] = Relationship(back_populates="run")
 
 
-class AgentRunPublic(SQLModel):
-    id: int
+class AgentRunAndEventsPublic(SQLModel):
+    id: uuid.UUID
     start_time: datetime
     status: str
     events: List[Event]
+
+
+class AgentRunPublic(SQLModel):
+    id: uuid.UUID
+    start_time: datetime
+    status: str
 
 
 class AgentRunsPublic(SQLModel):

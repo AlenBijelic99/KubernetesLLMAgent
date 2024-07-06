@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import List
 
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, FastAPI
@@ -7,7 +8,7 @@ from sqlmodel import select, desc
 
 from app.api.deps import SessionDep
 from app.crud import create_run
-from app.models import AgentRun, AgentRunsPublic, Event
+from app.models import AgentRun, AgentRunsPublic, Event, AgentRunPublic, AgentRunAndEventsPublic
 
 # Importer l'agent
 from app.monitoring_agent.main import run
@@ -34,18 +35,13 @@ async def run_agent(session: SessionDep):
 async def get_runs(session: SessionDep) -> AgentRunsPublic:
     logging.warning("Getting runs")
 
-    # Get all runs with their events
-    runs = session.exec(select(AgentRun).order_by(desc(AgentRun.start_time))).all()
+    runs = session.exec(select(AgentRun).order_by(desc(AgentRun.start_time)))
 
-    # Sort events by id
-    for run in runs:
-        run.events.sort(key=lambda e: e.id)
-
-    return AgentRunsPublic(data=runs, count=len(runs))
+    return AgentRunsPublic(data=runs, count=10)
 
 
-@router.get("/run/{id}")
-async def get_run(session: SessionDep, id: int):
+@router.get("/run/{id}", response_model=AgentRunAndEventsPublic)
+async def get_run(session: SessionDep, id: uuid.UUID) -> AgentRunAndEventsPublic:
     run = session.get(AgentRun, id)
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
