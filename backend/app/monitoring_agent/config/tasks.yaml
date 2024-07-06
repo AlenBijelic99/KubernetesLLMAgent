@@ -61,7 +61,7 @@ report_incident_task:
   backstory: >
     An incident reporter who can create an incident report with the findings from the previous tasks.
   description: >
-    Create an incident report with the findings from the previous tasks.
+    Create an incident report with the findings from the previous tasks. You cannot use the FINAL ANSWER from the previous tasks directly. You need to summarize the findings and recommendations in a clear and concise manner.
   expected_output: >
     A complete incident report with the findings from the previous tasks.
   examples:

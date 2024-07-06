@@ -14,7 +14,7 @@ import { MdOutlineErrorOutline, MdCheckCircleOutline } from 'react-icons/md'
 const RunsTable = ({runs, onSelectRun}: any) => {
     return (
         <TableContainer>
-            <Table variant='simple'>
+            <Table variant='simple' size='sm'>
                 <Thead>
                     <Tr>
                         <Th><Icon as={MdCheckCircleOutline} boxSize={5} color='gray.500' /></Th>

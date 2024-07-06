@@ -583,6 +583,7 @@ export class AgentService {
 
 export class WebsocketService {
 	public static getWebSocket(): WebSocket {
-		return new WebSocket('ws://localhost:8080/ws');
+		console.log(`${import.meta.env.VITE_WEBSOCKET_URL}/ws`)
+		return new WebSocket(`${import.meta.env.VITE_WEBSOCKET_URL}/ws`);
 	}
 }
