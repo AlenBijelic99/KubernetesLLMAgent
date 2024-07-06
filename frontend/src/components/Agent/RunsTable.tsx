@@ -10,9 +10,18 @@ import {
 } from "@chakra-ui/react";
 import { Icon } from "@chakra-ui/icons";
 import { MdOutlineErrorOutline, MdCheckCircleOutline } from 'react-icons/md';
+import { useNavigate } from '@tanstack/react-router';
 
 const RunsTable = ({ runs, onSelectRun, selectedRun }: any) => {
     const { colorMode } = useColorMode();
+    const navigate = useNavigate();
+
+    const handleRowClick = (run: any) => {
+        onSelectRun(run);
+        console.log(run.id)
+        navigate({ search: { run: run.id } });
+    };
+
     return (
         <TableContainer>
             <Table variant='simple' size='sm'>
@@ -26,7 +35,7 @@ const RunsTable = ({ runs, onSelectRun, selectedRun }: any) => {
                     {runs.map((run: any) => (
                         <Tr
                             key={run.id}
-                            onClick={() => onSelectRun(run)}
+                            onClick={() => handleRowClick(run)}
                             _hover={{ cursor: "pointer" }}
                             bg={colorMode === "dark"
                                 ? selectedRun?.id === run.id ? "gray.900" : "gray.800"

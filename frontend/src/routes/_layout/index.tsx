@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
     Box,
     Container,
@@ -14,7 +14,7 @@ import {
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
-//import {createFileRoute, useParams} from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import useAuth from "../../hooks/useAuth";
 import {
     AgentRunAndEventsPublic,
@@ -23,53 +23,60 @@ import {
     WebsocketService,
 } from "../../client";
 import RunAgentStepper from "../../components/Agent/RunAgentStepper";
-import RunAgentButton from "../../components/Agent/RunAgentButton.tsx";
-import RunsTable from "../../components/Agent/RunsTable.tsx";
-import {createFileRoute, useParams} from "@tanstack/react-router";
+import RunAgentButton from "../../components/Agent/RunAgentButton";
+import RunsTable from "../../components/Agent/RunsTable";
+
+type Run = {
+    uuid: string;
+}
 
 export const Route = createFileRoute("/_layout/")({
     component: Dashboard,
-})
+    validateSearch: (search: Record<string, unknown>): Run => {
+        return {
+            uuid: search.run as string,
+        };
+    }
+});
 
-function Dashboard(){
+function Dashboard() {
     const { user: currentUser } = useAuth();
-    const params = useParams({ from: "/_layout/$uuid" });
-    const uuid = params?.uuid as string | undefined;
+    const { uuid } = Route.useSearch();
     const [runs, setRuns] = useState<AgentRunPublic[]>([]);
     const [selectedRun, setSelectedRun] = useState<AgentRunAndEventsPublic | null>(null);
-    const [status, setStatus] = useState<any[]>([]);
+    const [, setStatus] = useState<any[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    useEffect(() => {
-        const fetchRuns = async () => {
-            try {
-                const data = await AgentService.getAgentRuns();
-                setRuns(data.data);
-            } catch (error) {
-                console.error("Failed to fetch agent runs", error);
-            }
-        };
-
-        fetchRuns();
+    const fetchRuns = useCallback(async () => {
+        try {
+            const data = await AgentService.getAgentRuns();
+            setRuns(data.data);
+        } catch (error) {
+            console.error("Failed to fetch agent runs", error);
+        }
     }, []);
 
-    useEffect(() => {
-        const fetchRunById = async (id: string) => {
-            try {
-                const data = await AgentService.getAgentRunById(id);
-                setSelectedRun(data);
-                onOpen();
-            } catch (error) {
-                console.error("Failed to fetch agent run", error);
-            }
-        };
+    const fetchRunById = useCallback(async (id: string) => {
+        try {
+            const data = await AgentService.getAgentRunById(id);
+            setSelectedRun(data);
+            onOpen();
+        } catch (error) {
+            console.error("Failed to fetch agent run", error);
+        }
+    }, [onOpen]);
 
+    useEffect(() => {
+        fetchRuns();
+    }, [fetchRuns]);
+
+    useEffect(() => {
         if (uuid) {
             fetchRunById(uuid);
         }
-    }, [uuid, onOpen]);
+    }, [uuid, fetchRunById]);
 
     useEffect(() => {
         const socket = WebsocketService.getWebSocket();
@@ -83,7 +90,16 @@ function Dashboard(){
             try {
                 const message = JSON.parse(event.data);
                 console.log("Received message:", message);
-                setStatus((prevStatus) => [...prevStatus, message]);
+
+                // Check if the message is a new run
+                if (message.type === 'new_run') {
+                    setRuns((prevRuns) => [...prevRuns, message.run]);
+                    setSelectedRun(message.run);
+                    onOpen();
+                } else {
+                    // Handle other types of messages
+                    setStatus((prevStatus) => [...prevStatus, message]);
+                }
             } catch (error) {
                 console.error("Error parsing JSON:", error);
             }
@@ -118,12 +134,17 @@ function Dashboard(){
                 socketRef.current.close();
             }
         };
-    }, [toast]);
+    }, [toast, onOpen]);
 
-    const handleSelectRun = (run: AgentRunAndEventsPublic) => {
-        setSelectedRun(run);
-        onOpen();
-    };
+    const handleSelectRun = useCallback(async (run: AgentRunPublic) => {
+        try {
+            const data = await AgentService.getAgentRunById(run.id);
+            setSelectedRun(data);
+            onOpen();
+        } catch (error) {
+            console.error("Failed to fetch agent run", error);
+        }
+    }, [onOpen]);
 
     return (
         <Container maxW="full">
@@ -133,12 +154,7 @@ function Dashboard(){
                 </Text>
                 <Text>Welcome back, nice to see you again!</Text>
                 <RunAgentButton />
-                <Box mt={4}>
-                    {status.map((message, index) => (
-                        <Text key={index}>{JSON.stringify(message)}</Text>
-                    ))}
-                </Box>
-                <Grid templateColumns="repeat(5, 1fr)" gap={4}>
+                <Grid templateColumns="repeat(5, 1fr)" gap={4} mt={4}>
                     <GridItem w="100%" colSpan={5}>
                         <RunsTable runs={runs} onSelectRun={handleSelectRun} selectedRun={selectedRun} />
                     </GridItem>
@@ -156,6 +172,6 @@ function Dashboard(){
             </Drawer>
         </Container>
     );
-};
+}
 
 export default Dashboard;
