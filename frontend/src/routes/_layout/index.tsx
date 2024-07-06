@@ -9,12 +9,12 @@ import {
     DrawerHeader,
     DrawerOverlay,
     Grid,
-    GridItem,
+    GridItem, Spinner,
     Text,
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
-import { createFileRoute } from "@tanstack/react-router";
+import {createFileRoute, useNavigate} from "@tanstack/react-router";
 import useAuth from "../../hooks/useAuth";
 import {
     AgentRunAndEventsPublic,
@@ -25,6 +25,8 @@ import {
 import RunAgentStepper from "../../components/Agent/RunAgentStepper";
 import RunAgentButton from "../../components/Agent/RunAgentButton";
 import RunsTable from "../../components/Agent/RunsTable";
+import {Icon} from "@chakra-ui/icons";
+import {MdCheckCircleOutline, MdOutlineErrorOutline} from "react-icons/md";
 
 type Run = {
     uuid: string;
@@ -47,7 +49,14 @@ function Dashboard() {
     const [, setStatus] = useState<any[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const toast = useToast();
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen, onOpen, onClose: drawerOnClose } = useDisclosure();
+    const navigate = useNavigate();
+
+    const onClose = () => {
+        drawerOnClose();
+        setSelectedRun(null);
+        navigate({ to: "/", search: ""});
+    };
 
     const fetchRuns = useCallback(async () => {
         try {
@@ -164,7 +173,15 @@ function Dashboard() {
                 <DrawerOverlay />
                 <DrawerContent>
                     <DrawerCloseButton />
-                    <DrawerHeader>Run Details</DrawerHeader>
+                    <DrawerHeader>
+                        {selectedRun?.status === 'failed' ? (
+                            <Icon as={MdOutlineErrorOutline} boxSize={5} color='red.500' />
+                        ) : selectedRun?.status === 'running' ? (
+                            <Spinner color='blue.500' size='sm'/>
+                        ) : (
+                            <Icon as={MdCheckCircleOutline} boxSize={5} color='green.500' />
+                        )}
+                    </DrawerHeader>
                     <DrawerBody>
                         {selectedRun && <RunAgentStepper run={selectedRun} />}
                     </DrawerBody>

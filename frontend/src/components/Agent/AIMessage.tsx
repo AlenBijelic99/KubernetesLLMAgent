@@ -22,7 +22,7 @@ const AIMessage = ({ message }: AIMessageProps) => {
                     <Heading as="h3" size="md" mb={2} color={colorMode === "dark" ? "teal.300" : "teal.700"}>
                         AI Message
                     </Heading>
-                    <Text mb={4} p={2} bg={colorMode === "dark" ? "gray.800" : "white"} borderRadius="md">
+                    <Text fontSize='md' mb={4} p={2} bg={colorMode === "dark" ? "gray.800" : "white"} borderRadius="md">
                         {message.content}
                     </Text>
                 </>
