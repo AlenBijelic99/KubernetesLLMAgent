@@ -1,5 +1,6 @@
 import datetime
 import logging
+import uuid
 from typing import Any, Sequence
 
 from sqlmodel import Session, select
@@ -67,7 +68,7 @@ def create_run(session: Session, status: str = "running") -> AgentRun:
         raise e
 
 
-def create_event(session: Session, run_id: int, event_data: dict) -> Event:
+def create_event(session: Session, run_id: uuid.UUID, event_data: dict) -> Event:
     logging.warning(f"Creating event: {event_data}")
     event = Event(
         event_data=event_data,
@@ -80,12 +81,12 @@ def create_event(session: Session, run_id: int, event_data: dict) -> Event:
     return event
 
 
-def get_run_events(session: Session, run_id: int) -> Sequence[Event]:
+def get_run_events(session: Session, run_id: uuid.UUID) -> Sequence[Event]:
     statement = select(Event).where(Event.run_id == run_id)
     return session.exec(statement).all()
 
 
-def set_run_status(session: Session, run_id: int, status: str) -> AgentRun:
+def set_run_status(session: Session, run_id: uuid.UUID, status: str) -> AgentRun:
     run = session.get(AgentRun, run_id)
     run.status = status
     session.add(run)
