@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {
-    Box,
+    Box, Icon,
     Step,
     StepDescription,
     StepIndicator,
@@ -11,8 +11,9 @@ import {
     useColorMode,
     useSteps,
 } from "@chakra-ui/react";
-import {CheckIcon, ChevronDownIcon, ChevronUpIcon, MinusIcon} from "@chakra-ui/icons";
+import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from "@chakra-ui/icons";
 import {AgentRunPublic, Event} from "../../client";
+import {MdDoNotDisturbOn} from "react-icons/md";
 
 interface RunAgentStepperProps {
     run: AgentRunPublic;
@@ -81,7 +82,7 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                 <Box width='100%'>
                     <Step key={key}>
                         <StepIndicator>
-                            <StepStatus complete={eventGroups[key].length > 0 ? <CheckIcon/> : <MinusIcon/>}/>
+                            <StepStatus complete={eventGroups[key].length > 0 ? <CheckIcon/> : <Icon height='1.5em' width='1.5em' color={colorMode === "dark" ? "gray.800" : "white"} as={MdDoNotDisturbOn}/>}/>
                         </StepIndicator>
 
                         <Box flexShrink="0" textAlign="left" width="100%" minHeight="60px" mb="4">
@@ -96,6 +97,7 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                                         overflow="hidden"
                                         position="relative"
                                     >
+                                        <Box mb={expandedSteps.includes(key) ? 8 : 0}>
                                         {eventGroups[key].map((event, subIndex) => {
                                             const eventKey = Object.keys(event.event_data)[0];
                                             const messages = event.event_data[eventKey].messages;
@@ -104,19 +106,20 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                                                 <Box key={subIndex} mb={2}>
                                                     <strong>{eventKey}:</strong>
                                                     {messages.map((message, msgIndex) => (
-                                                        <Box key={msgIndex} mt={1}>
+                                                        <Box key={msgIndex}>
                                                             {message.content}
                                                         </Box>
                                                     ))}
                                                 </Box>
                                             );
                                         })}
+                                        </Box>
                                         <Box
                                             position="absolute"
                                             bottom="0"
                                             left="0"
                                             right="0"
-                                            height="50px"
+                                            height={expandedSteps.includes(key) ? 30 : 50}
                                             display="flex"
                                             justifyContent="center"
                                             alignItems="flex-end"
