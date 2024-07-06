@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import {
     Box,
     Container,
@@ -11,28 +12,35 @@ import {
     GridItem,
     Text,
     useDisclosure,
-    useToast
+    useToast,
 } from "@chakra-ui/react";
-import {createFileRoute} from "@tanstack/react-router";
+//import {createFileRoute, useParams} from "@tanstack/react-router";
 import useAuth from "../../hooks/useAuth";
-import RunAgentButton from "../../components/Agent/RunAgentButton";
-import RunsTable from "../../components/Agent/RunsTable";
-import {useEffect, useRef, useState} from "react";
-import {AgentRunPublic, AgentService, WebsocketService} from "../../client";
+import {
+    AgentRunAndEventsPublic,
+    AgentRunPublic,
+    AgentService,
+    WebsocketService,
+} from "../../client";
 import RunAgentStepper from "../../components/Agent/RunAgentStepper";
+import RunAgentButton from "../../components/Agent/RunAgentButton.tsx";
+import RunsTable from "../../components/Agent/RunsTable.tsx";
+import {createFileRoute, useParams} from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_layout/")({
     component: Dashboard,
-});
+})
 
-function Dashboard() {
-    const {user: currentUser} = useAuth();
+function Dashboard(){
+    const { user: currentUser } = useAuth();
+    const params = useParams({ from: "/_layout/$uuid" });
+    const uuid = params?.uuid as string | undefined;
     const [runs, setRuns] = useState<AgentRunPublic[]>([]);
-    const [selectedRun, setSelectedRun] = useState<AgentRunPublic | null>(null);
+    const [selectedRun, setSelectedRun] = useState<AgentRunAndEventsPublic | null>(null);
     const [status, setStatus] = useState<any[]>([]);
     const socketRef = useRef<WebSocket | null>(null);
     const toast = useToast();
-    const {isOpen, onOpen, onClose} = useDisclosure();
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     useEffect(() => {
         const fetchRuns = async () => {
@@ -46,6 +54,22 @@ function Dashboard() {
 
         fetchRuns();
     }, []);
+
+    useEffect(() => {
+        const fetchRunById = async (id: string) => {
+            try {
+                const data = await AgentService.getAgentRunById(id);
+                setSelectedRun(data);
+                onOpen();
+            } catch (error) {
+                console.error("Failed to fetch agent run", error);
+            }
+        };
+
+        if (uuid) {
+            fetchRunById(uuid);
+        }
+    }, [uuid, onOpen]);
 
     useEffect(() => {
         const socket = WebsocketService.getWebSocket();
@@ -96,7 +120,7 @@ function Dashboard() {
         };
     }, [toast]);
 
-    const handleSelectRun = (run: AgentRunPublic) => {
+    const handleSelectRun = (run: AgentRunAndEventsPublic) => {
         setSelectedRun(run);
         onOpen();
     };
@@ -108,7 +132,7 @@ function Dashboard() {
                     Hi, {currentUser?.full_name || currentUser?.email} 👋🏼
                 </Text>
                 <Text>Welcome back, nice to see you again!</Text>
-                <RunAgentButton/>
+                <RunAgentButton />
                 <Box mt={4}>
                     {status.map((message, index) => (
                         <Text key={index}>{JSON.stringify(message)}</Text>
@@ -116,22 +140,22 @@ function Dashboard() {
                 </Box>
                 <Grid templateColumns="repeat(5, 1fr)" gap={4}>
                     <GridItem w="100%" colSpan={5}>
-                        <RunsTable runs={runs} onSelectRun={handleSelectRun} selectedRun={selectedRun}/>
+                        <RunsTable runs={runs} onSelectRun={handleSelectRun} selectedRun={selectedRun} />
                     </GridItem>
                 </Grid>
             </Box>
             <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="xl">
-                <DrawerOverlay/>
+                <DrawerOverlay />
                 <DrawerContent>
-                    <DrawerCloseButton/>
+                    <DrawerCloseButton />
                     <DrawerHeader>Run Details</DrawerHeader>
                     <DrawerBody>
-                        {selectedRun && <RunAgentStepper run={selectedRun}/>}
+                        {selectedRun && <RunAgentStepper run={selectedRun} />}
                     </DrawerBody>
                 </DrawerContent>
             </Drawer>
         </Container>
     );
-}
+};
 
 export default Dashboard;

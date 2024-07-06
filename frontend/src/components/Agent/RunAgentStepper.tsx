@@ -16,13 +16,13 @@ import {
     useSteps,
 } from "@chakra-ui/react";
 import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from "@chakra-ui/icons";
-import {AgentRunPublic, Event} from "../../client";
+import {AgentRunAndEventsPublic, Event} from "../../client";
 import {MdDoNotDisturbOn} from "react-icons/md";
 import ToolMessage from "./ToolMessage.tsx";
 import AIMessage from "./AIMessage.tsx";
 
 interface RunAgentStepperProps {
-    run: AgentRunPublic;
+    run: AgentRunAndEventsPublic;
 }
 
 const stepKeys = ['metric_analyser', 'diagnostic', 'solution', 'incident_reporter'];
@@ -61,6 +61,7 @@ const groupEvents = (events: Event[]) => {
 };
 
 const RunAgentStepper = ({run}: RunAgentStepperProps) => {
+    console.log(run)
     const eventGroups = groupEvents(run.events);
 
     // Find the index of the last step with data

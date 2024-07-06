@@ -179,14 +179,20 @@ export interface Event {
 	event_data: {
 		[key: string]: EventData;
 	};
-	id: number;
+	id: string;
 }
 
-export interface AgentRunPublic {
-	id: number;
+export interface AgentRunAndEventsPublic {
+	id: string;
 	start_time: string;
 	status: string;
 	events: Event[];
+}
+
+export interface AgentRunPublic {
+	id: string;
+	start_time: string;
+	status: string;
 }
 
 export interface AgentRunsPublic {

@@ -18,7 +18,7 @@ import {
 	ItemPublic,
 	ItemsPublic,
 	ItemUpdate,
-	AgentRunsPublic
+	AgentRunsPublic, AgentRunAndEventsPublic
 } from './models';
 
 export type TDataLoginAccessToken = {
@@ -579,11 +579,20 @@ export class AgentService {
 			},
 		});
 	}
+
+	public static getAgentRunById(runId: string): CancelablePromise<AgentRunAndEventsPublic> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: `/api/v1/agent/run/${runId}`,
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
 }
 
 export class WebsocketService {
 	public static getWebSocket(): WebSocket {
-		console.log(`${import.meta.env.VITE_WEBSOCKET_URL}/ws`)
 		return new WebSocket(`${import.meta.env.VITE_WEBSOCKET_URL}/ws`);
 	}
 }
