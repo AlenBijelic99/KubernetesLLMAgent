@@ -1,5 +1,5 @@
 import { AgentService } from "../../client";
-import { Button, useToast } from "@chakra-ui/react";
+import {Button, useToast} from "@chakra-ui/react";
 
 const RunAgentButton = () => {
     const toast = useToast();

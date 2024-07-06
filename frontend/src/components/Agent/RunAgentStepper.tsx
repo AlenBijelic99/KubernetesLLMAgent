@@ -1,6 +1,9 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {
-    Box, Icon,
+    Box,
+    Button,
+    HStack,
+    Icon,
     Step,
     StepDescription,
     StepIndicator,
@@ -8,12 +11,15 @@ import {
     StepSeparator,
     StepStatus,
     StepTitle,
+    Text,
     useColorMode,
     useSteps,
 } from "@chakra-ui/react";
 import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from "@chakra-ui/icons";
 import {AgentRunPublic, Event} from "../../client";
 import {MdDoNotDisturbOn} from "react-icons/md";
+import ToolMessage from "./ToolMessage.tsx";
+import AIMessage from "./AIMessage.tsx";
 
 interface RunAgentStepperProps {
     run: AgentRunPublic;
@@ -70,80 +76,109 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
     const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
     const {colorMode} = useColorMode();
 
+    useEffect(() => {
+        setExpandedSteps([]); // Reset expanded steps when the run changes
+    }, [run]);
+
     const toggleExpand = (key: string) => {
         setExpandedSteps(prev =>
             prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
         );
     };
 
+    const expandAll = () => {
+        setExpandedSteps(stepKeys);
+    };
+
+    const collapseAll = () => {
+        setExpandedSteps([]);
+    };
+
     return (
-        <Stepper colorScheme="teal" index={activeStep} size="sm" orientation="vertical" gap="0" padding="10">
-            {stepKeys.map((key) => (
-                <Box width='100%'>
-                    <Step key={key}>
-                        <StepIndicator>
-                            <StepStatus complete={eventGroups[key].length > 0 ? <CheckIcon/> : <Icon height='1.5em' width='1.5em' color={colorMode === "dark" ? "gray.800" : "white"} as={MdDoNotDisturbOn}/>}/>
-                        </StepIndicator>
+        <Box>
+            <HStack mb={4}>
+                <Button onClick={expandAll} colorScheme="teal">Expand All</Button>
+                <Button onClick={collapseAll} colorScheme="teal">Collapse All</Button>
+            </HStack>
+            <Stepper colorScheme="teal" index={activeStep} size="sm" orientation="vertical" gap="0" padding="10">
+                {stepKeys.map((key) => (
+                    <Box key={key} width='100%'>
+                        <Step>
+                            <StepIndicator>
+                                <StepStatus complete={eventGroups[key].length > 0 ? <CheckIcon/> :
+                                    <Icon height='1.5em' width='1.5em'
+                                          color={colorMode === "dark" ? "gray.800" : "white"} as={MdDoNotDisturbOn}/>}/>
+                            </StepIndicator>
 
-                        <Box flexShrink="0" textAlign="left" width="100%" minHeight="60px" mb="4">
-                            <StepTitle>{`${groupNames[key]}`}</StepTitle>
-                            <StepDescription as="div">
-                                {eventGroups[key].length > 0 && (
-                                    <Box
-                                        whiteSpace="pre-wrap"
-                                        wordBreak="break-word"
-                                        overflowWrap="anywhere"
-                                        maxHeight={expandedSteps.includes(key) ? "none" : "100px"}
-                                        overflow="hidden"
-                                        position="relative"
-                                    >
-                                        <Box mb={expandedSteps.includes(key) ? 8 : 0}>
-                                        {eventGroups[key].map((event, subIndex) => {
-                                            const eventKey = Object.keys(event.event_data)[0];
-                                            const messages = event.event_data[eventKey].messages;
-
-                                            return (
-                                                <Box key={subIndex} mb={2}>
-                                                    <strong>{eventKey}:</strong>
-                                                    {messages.map((message, msgIndex) => (
-                                                        <Box key={msgIndex}>
-                                                            {message.content}
-                                                        </Box>
-                                                    ))}
-                                                </Box>
-                                            );
-                                        })}
-                                        </Box>
+                            <Box flexShrink="0" textAlign="left" width="100%" minHeight="60px" mb="4">
+                                <StepTitle>{`${groupNames[key]}`}</StepTitle>
+                                <StepDescription as="div">
+                                    {eventGroups[key].length > 0 && (
                                         <Box
-                                            position="absolute"
-                                            bottom="0"
-                                            left="0"
-                                            right="0"
-                                            height={expandedSteps.includes(key) ? 30 : 50}
-                                            display="flex"
-                                            justifyContent="center"
-                                            alignItems="flex-end"
-                                            cursor="pointer"
-                                            onClick={() => toggleExpand(key)}
-                                            {...(!expandedSteps.includes(key) && {
-                                                bgGradient: colorMode === "dark"
-                                                    ? "linear(to-t, gray.800, rgba(255,255,255,0))"
-                                                    : "linear(to-t, white, rgba(255,255,255,0))"
-                                            })}
+                                            whiteSpace="pre-wrap"
+                                            wordBreak="break-word"
+                                            overflowWrap="anywhere"
+                                            maxHeight={expandedSteps.includes(key) ? "none" : "100px"}
+                                            overflow="hidden"
+                                            position="relative"
                                         >
-                                            {expandedSteps.includes(key) ? <ChevronUpIcon boxSize={6}/> :
-                                                <ChevronDownIcon boxSize={6}/>}
-                                        </Box>
-                                    </Box>
-                                )}
-                            </StepDescription>
-                        </Box>
+                                            <Box mb={expandedSteps.includes(key) ? 8 : 0}>
+                                                {eventGroups[key].map((event, subIndex) => {
+                                                    const eventKey = Object.keys(event.event_data)[0];
+                                                    const messages = event.event_data[eventKey].messages;
 
-                        <StepSeparator/>
-                    </Step>
-                </Box>
-            ))}
-        </Stepper>
+                                                    return (
+                                                        <Box key={subIndex} mb={2}>
+                                                            {messages.map((message, msgIndex) => (
+                                                                <Box key={msgIndex}>
+                                                                    {message.content !== "" && (
+                                                                        <>
+                                                                            {message.type === 'ai' ? (
+                                                                                <AIMessage message={message}/>
+                                                                            ) : message.type === 'tool' ? (
+                                                                                <ToolMessage message={message}/>
+                                                                            ) : (
+                                                                                <Text>Unknown message type</Text>
+                                                                            )}
+                                                                        </>
+                                                                    )}
+                                                                </Box>
+                                                            ))}
+                                                        </Box>
+                                                    );
+                                                })}
+                                            </Box>
+                                            <Box
+                                                position="absolute"
+                                                bottom="0"
+                                                left="0"
+                                                right="0"
+                                                height={expandedSteps.includes(key) ? 30 : 50}
+                                                display="flex"
+                                                justifyContent="center"
+                                                alignItems="flex-end"
+                                                cursor="pointer"
+                                                onClick={() => toggleExpand(key)}
+                                                {...(!expandedSteps.includes(key) && {
+                                                    bgGradient: colorMode === "dark"
+                                                        ? "linear(to-t, gray.800, rgba(255,255,255,0))"
+                                                        : "linear(to-t, white, rgba(255,255,255,0))"
+                                                })}
+                                            >
+                                                {expandedSteps.includes(key) ? <ChevronUpIcon boxSize={6}/> :
+                                                    <ChevronDownIcon boxSize={6}/>}
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </StepDescription>
+                            </Box>
+
+                            <StepSeparator/>
+                        </Step>
+                    </Box>
+                ))}
+            </Stepper>
+        </Box>
     );
 };
 
