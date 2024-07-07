@@ -43,6 +43,9 @@ async def get_runs(session: SessionDep) -> AgentRunsPublic:
 @router.get("/run/{id}", response_model=AgentRunAndEventsPublic)
 async def get_run(session: SessionDep, id: uuid.UUID) -> AgentRunAndEventsPublic:
     run = session.get(AgentRun, id)
+
+    
+
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
     return run
