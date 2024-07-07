@@ -44,7 +44,7 @@ async def get_runs(session: SessionDep) -> AgentRunsPublic:
 async def get_run(session: SessionDep, id: uuid.UUID) -> AgentRunAndEventsPublic:
     run = session.get(AgentRun, id)
 
-    
+    run.events.sort(key=lambda e: e.inserted_at)
 
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
