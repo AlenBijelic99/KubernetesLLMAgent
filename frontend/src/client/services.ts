@@ -2,7 +2,24 @@ import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
 
-import type { Body_login_login_access_token,Message,NewPassword,Token,UserPublic,UpdatePassword,UserCreate,UserRegister,UsersPublic,UserUpdate,UserUpdateMe,ItemCreate,ItemPublic,ItemsPublic,ItemUpdate } from './models';
+import {
+	Body_login_login_access_token,
+	Message,
+	NewPassword,
+	Token,
+	UserPublic,
+	UpdatePassword,
+	UserCreate,
+	UserRegister,
+	UsersPublic,
+	UserUpdate,
+	UserUpdateMe,
+	ItemCreate,
+	ItemPublic,
+	ItemsPublic,
+	ItemUpdate,
+	AgentRunsPublic, AgentRunAndEventsPublic
+} from './models';
 
 export type TDataLoginAccessToken = {
                 formData: Body_login_login_access_token
@@ -552,4 +569,30 @@ export class AgentService {
             },
         });
     }
+
+	public static getAgentRuns(): CancelablePromise<AgentRunsPublic> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: '/api/v1/agent/runs',
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+
+	public static getAgentRunById(runId: string): CancelablePromise<AgentRunAndEventsPublic> {
+		return __request(OpenAPI, {
+			method: 'GET',
+			url: `/api/v1/agent/run/${runId}`,
+			errors: {
+				422: `Validation Error`,
+			},
+		});
+	}
+}
+
+export class WebsocketService {
+	public static getWebSocket(): WebSocket {
+		return new WebSocket(`${import.meta.env.VITE_WEBSOCKET_URL}/ws`);
+	}
 }

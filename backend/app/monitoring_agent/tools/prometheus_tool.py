@@ -29,15 +29,11 @@ def execute_prometheus_query(query: str) -> str:
     # Connect to Prometheus
     prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
 
-    logging.warn(f"Prometheus Query: {query}")
-
     if not prometheus.check_prometheus_connection():
         return "Prometheus is not available"
 
     # Sanitize input to avoid injection
     sanitized_query = re.sub(r'[^\w\s{}[\]:,=()\-\'"]', '', query)
-
-    logging.warn(f"Prometheus sanitized Query: {sanitized_query}")
 
     # Execute the query
     data = prometheus.custom_query(query=sanitized_query)

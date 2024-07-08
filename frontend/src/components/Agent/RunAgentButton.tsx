@@ -1,5 +1,5 @@
 import { AgentService } from "../../client";
-import { Button, useToast } from "@chakra-ui/react";
+import {Button, useToast} from "@chakra-ui/react";
 
 const RunAgentButton = () => {
     const toast = useToast();
@@ -29,7 +29,7 @@ const RunAgentButton = () => {
         try {
             await agentPromise;
         } catch (error: any) {
-            let errorMessage = "An unexpected error occurred.";
+            let errorMessage = error.response?.data?.message;
             if (error.response && error.response.status === 429) {
                 errorMessage = "You exceeded your current quota, please check your plan and billing details.";
             } else if (error.message) {
@@ -47,8 +47,10 @@ const RunAgentButton = () => {
     };
 
     return (
-        <Button colorScheme='teal' onClick={handleClick}>Run Agent</Button>
+        <Button colorScheme="teal" onClick={handleClick}>
+            Run Agent
+        </Button>
     );
-}
+};
 
 export default RunAgentButton;

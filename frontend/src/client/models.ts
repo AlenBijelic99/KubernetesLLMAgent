@@ -130,3 +130,72 @@ export type ValidationError = {
 	type: string;
 };
 
+export interface ToolCall {
+	id: string;
+	function: {
+		arguments: string;
+		name: string;
+	};
+	type: string;
+}
+
+export interface LLMMessage {
+	content: string;
+	additional_kwargs: {
+		tool_calls?: ToolCall[];
+	};
+	response_metadata: {
+		token_usage: {
+			completion_tokens: number;
+			prompt_tokens: number;
+			total_tokens: number;
+		};
+		model_name: string;
+		system_fingerprint: string | null;
+		finish_reason: string;
+		logprobs: any | null;
+	};
+	type: string;
+	name: string;
+	id: string | null;
+	example: boolean;
+	tool_calls: ToolCall[];
+	invalid_tool_calls: any[];
+	usage_metadata: {
+		input_tokens: number;
+		output_tokens: number;
+		total_tokens: number;
+	};
+}
+
+export interface EventData {
+	messages: LLMMessage[];
+	sender: string;
+}
+
+export interface Event {
+	run_id: number;
+	inserted_at: string;
+	event_data: {
+		[key: string]: EventData;
+	};
+	id: string;
+}
+
+export interface AgentRunAndEventsPublic {
+	id: string;
+	start_time: string;
+	status: string;
+	events: Event[];
+}
+
+export interface AgentRunPublic {
+	id: string;
+	start_time: string;
+	status: string;
+}
+
+export interface AgentRunsPublic {
+	data: AgentRunPublic[];
+	count: number;
+}

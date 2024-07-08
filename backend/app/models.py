@@ -1,4 +1,17 @@
+import os
+import uuid
+from datetime import datetime
+from typing import List, Optional, Union
+
+import pytz
+from sqlalchemy import Column, String, JSON
+from sqlalchemy.orm import declared_attr
 from sqlmodel import Field, Relationship, SQLModel
+
+TIMEZONE = pytz.timezone(os.getenv("TIMEZONE", "Europe/Zurich"))
+
+def get_current_time():
+    return datetime.now(TIMEZONE)
 
 
 # Shared properties
@@ -111,3 +124,42 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str
+
+
+class AgentRunBase(SQLModel):
+    start_time: datetime = Field(default_factory=get_current_time)
+    status: str
+
+
+class EventBase(SQLModel):
+    event_data: dict = Field(sa_column=Column(JSON), default={})
+    inserted_at: datetime = Field(default_factory=get_current_time)
+    run_id: Optional[uuid.UUID] = Field(default=None, foreign_key="agentrun.id")
+
+
+class Event(EventBase, table=True):
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
+    run: Optional["AgentRun"] = Relationship(back_populates="events")
+
+
+class AgentRun(AgentRunBase, table=True):
+    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
+    events: List[Event] = Relationship(back_populates="run")
+
+
+class AgentRunAndEventsPublic(SQLModel):
+    id: uuid.UUID
+    start_time: datetime
+    status: str
+    events: List[Event]
+
+
+class AgentRunPublic(SQLModel):
+    id: uuid.UUID
+    start_time: datetime
+    status: str
+
+
+class AgentRunsPublic(SQLModel):
+    data: List[AgentRunPublic]
+    count: int

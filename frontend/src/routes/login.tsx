@@ -16,7 +16,7 @@ import {
 import {
   Link as RouterLink,
   createFileRoute,
-  redirect,
+  redirect, useNavigate,
 } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
 
@@ -31,12 +31,14 @@ export const Route = createFileRoute("/login")({
     if (isLoggedIn()) {
       throw redirect({
         to: "/",
+        search: "",
       })
     }
   },
 })
 
 function Login() {
+  const navigate = useNavigate()
   const [show, setShow] = useBoolean()
   const { loginMutation, error, resetError } = useAuth()
   const {
@@ -123,7 +125,10 @@ function Login() {
           {error && <FormErrorMessage>{error}</FormErrorMessage>}
         </FormControl>
         <Center>
-          <Link as={RouterLink} to="/recover-password" color="blue.500">
+          <Link as={RouterLink}
+                onClick={() => {
+                  navigate({ to: "/recover-password", search: ""});
+                }} color="blue.500">
             Forgot password?
           </Link>
         </Center>
