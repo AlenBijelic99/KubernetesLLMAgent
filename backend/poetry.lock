@@ -1608,6 +1608,21 @@ PyYAML = ">=5.3"
 tenacity = ">=8.1.0,<8.4.0 || >8.4.0,<9.0.0"
 
 [[package]]
+name = "langchain-experimental"
+version = "0.0.62"
+description = "Building applications with LLMs through composability"
+optional = false
+python-versions = "<4.0,>=3.8.1"
+files = [
+    {file = "langchain_experimental-0.0.62-py3-none-any.whl", hash = "sha256:9240f9e3490e819976f20a37863970036e7baacb7104b9eb6833d19ab6d518c9"},
+    {file = "langchain_experimental-0.0.62.tar.gz", hash = "sha256:9737fbc8429d24457ea4d368e3c9ba9ed1cace0564fb5f1a96a3027a588bd0ac"},
+]
+
+[package.dependencies]
+langchain-community = ">=0.2.6,<0.3.0"
+langchain-core = ">=0.2.10,<0.3.0"
+
+[[package]]
 name = "langchain-openai"
 version = "0.1.13"
 description = "An integration package connecting OpenAI and LangChain"
@@ -3979,4 +3994,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<=3.13"
-content-hash = "82ff746d306d4cefe55f8d07471337b16bdf5683f7b4a30c90ecbcc3676e92dc"
+content-hash = "64578261db2c80348c4560997fbf3c471b18246255a9a1fb42917cbf2b18b1cd"

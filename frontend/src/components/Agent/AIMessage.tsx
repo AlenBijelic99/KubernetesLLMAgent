@@ -19,6 +19,7 @@ const AIMessage = ({ message }: AIMessageProps) => {
         >
             {message.content !== "" && (
                 <>
+                    <Text fontSize='sm'>{message.response_metadata.model_name}</Text>
                     <Heading as="h3" size="md" mb={2} color={colorMode === "dark" ? "teal.300" : "teal.700"}>
                         AI Message
                     </Heading>
@@ -42,6 +43,7 @@ const AIMessage = ({ message }: AIMessageProps) => {
                             bg={colorMode === "dark" ? "gray.800" : "white"}
                             shadow="sm"
                         >
+                            <Text fontSize='sm'>{message.response_metadata.model_name}</Text>
                             <Text fontWeight="bold" color={colorMode === "dark" ? "blue.200" : "blue.600"}>
                                 {tool_call.name}
                             </Text>

@@ -1,6 +1,7 @@
 import io
 import json
 import logging
+import uuid
 from typing import Any, Dict
 
 from PIL import Image
@@ -131,7 +132,7 @@ def export_graph_image(graph):
     image.show()
 
 
-async def run(manager, session: SessionDep, run_id: int):
+async def run(manager, session: SessionDep, run_id: uuid.UUID):
     try:
         # Create the graph with full workflow
         graph = generate_graph()
@@ -139,15 +140,17 @@ async def run(manager, session: SessionDep, run_id: int):
         # Export the graph image
         export_graph_image(graph)
 
-        namespaces = ["boutique"]
+        namespaces = ["boutique", "apm"]
 
         input = {
             "messages": [
                 HumanMessage(
-                    content=f"Check the metrics for all pods in the following namespaces ${', '.join(namespaces)}."
+                    content=f"Check the metrics for all pods in the following namespaces {', '.join(namespaces)}."
                 )
             ],
         }
+
+        create_event(session, run_id, event_to_json({"metric_analyser": input}))
 
         async for event in graph.astream(
                 input,

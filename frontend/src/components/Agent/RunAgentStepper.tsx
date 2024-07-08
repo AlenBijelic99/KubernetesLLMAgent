@@ -20,6 +20,7 @@ import {AgentRunAndEventsPublic, Event} from "../../client";
 import {MdDoNotDisturbOn} from "react-icons/md";
 import ToolMessage from "./ToolMessage.tsx";
 import AIMessage from "./AIMessage.tsx";
+import HumanMessage from "./HumanMessage.tsx";
 
 interface RunAgentStepperProps {
     run: AgentRunAndEventsPublic;
@@ -134,7 +135,9 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                                                                 <Box key={msgIndex}>
                                                                     {message.content !== "" && (
                                                                         <>
-                                                                            {message.type === 'ai' ? (
+                                                                            {message.type === 'human' ? (
+                                                                                <HumanMessage message={message}/>
+                                                                            ) : message.type === 'ai' ? (
                                                                                 <AIMessage message={message}/>
                                                                             ) : message.type === 'tool' ? (
                                                                                 <ToolMessage message={message}/>
