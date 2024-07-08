@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 
 from app.monitoring_agent.agent import create_agent
 from app.monitoring_agent.llm import get_llm
-from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs
+from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -44,28 +44,28 @@ llm = get_llm()
 
 metric_analyser_agent = create_agent(
     llm,
-    [get_pod_names, execute_prometheus_query],
+    [get_pod_names, execute_prometheus_query, get_nodes_resources],
     system_message=parse_config(tasks_config["analyse_metric_task"]),
 )
 metric_analyser_node = functools.partial(agent_node, agent=metric_analyser_agent, name="metric_analyser")
 
 diagnostic_agent = create_agent(
     llm,
-    [execute_prometheus_query],
+    [execute_prometheus_query, get_pod_logs, get_pod_yaml],
     system_message=parse_config(tasks_config["diagnose_issue_task"]),
 )
 diagnostic_node = functools.partial(agent_node, agent=diagnostic_agent, name="diagnostic")
 
 solution_agent = create_agent(
     llm,
-    [execute_prometheus_query],
+    [],
     system_message=parse_config(tasks_config["provide_solution_task"]),
 )
 solution_node = functools.partial(agent_node, agent=solution_agent, name="solution")
 
 incident_reporter_agent = create_agent(
     llm,
-    [execute_prometheus_query],
+    [],
     system_message=parse_config(tasks_config["report_incident_task"]),
 )
 incident_reporter_node = functools.partial(agent_node, agent=incident_reporter_agent, name="incident_reporter")

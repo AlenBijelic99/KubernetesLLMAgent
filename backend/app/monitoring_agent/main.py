@@ -19,12 +19,12 @@ from app.monitoring_agent.agent_nodes import metric_analyser_node, diagnostic_no
     incident_reporter_node
 from app.monitoring_agent.edge import router
 from app.monitoring_agent.graph import AgentState
-from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs
+from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
 load_dotenv()
 
-tools = [get_pod_names, execute_prometheus_query, get_pod_logs]
+tools = [get_pod_names, execute_prometheus_query, get_pod_logs, get_nodes_resources, get_pod_yaml]
 tool_node = ToolNode(tools)
 
 
@@ -102,7 +102,7 @@ def generate_graph():
     workflow.add_conditional_edges(
         "solution",
         router,
-        {"continue": "incident_reporter", "call_tool": "call_tool", "__end__": "incident_reporter"},
+        {"continue": "incident_reporter", "__end__": "incident_reporter"},
     )
 
     workflow.add_conditional_edges(
@@ -139,14 +139,18 @@ async def run(manager, session: SessionDep, run_id: int):
         # Export the graph image
         export_graph_image(graph)
 
+        namespaces = ["boutique"]
+
+        input = {
+            "messages": [
+                HumanMessage(
+                    content=f"Check the metrics for all pods in the following namespaces ${', '.join(namespaces)}."
+                )
+            ],
+        }
+
         async for event in graph.astream(
-                {
-                    "messages": [
-                        HumanMessage(
-                            content="Check the metrics for all pods in the 'boutique' namespace."
-                        )
-                    ],
-                },
+                input,
                 stream_mode="updates"
         ):
             print(event)

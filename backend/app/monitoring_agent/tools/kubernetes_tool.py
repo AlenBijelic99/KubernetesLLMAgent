@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import List, Any
 
 from langchain_core.tools import tool
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ k8s_config = KubernetesConfig(
 
 
 @tool
-def get_pod_names(namespace: str) -> list:
+def get_pod_names(namespace: str) -> list[Any] | str:
     """Get pods in given namespace. Returns a list of pod names in the specified namespace."""
     v1 = k8s_config.get_client()
 
@@ -30,12 +31,25 @@ def get_pod_names(namespace: str) -> list:
 
 
 @tool
-def get_pod_logs(pod: str, namespace: str) -> str:
+def get_nodes_resources() -> list[Any] | str:
+    """Get nodes resources. Returns a list of nodes resources."""
+    v1 = k8s_config.get_client()
+
+    try:
+        nodes = v1.list_node()
+        return [node.status.capacity for node in nodes.items]
+    except client.ApiException as e:
+        logging.error(f"Exception when calling CoreV1Api->list_node: {e}")
+        return f"Exception when calling CoreV1Api->list_node: {e}"
+
+
+@tool
+def get_pod_logs(pod: str, namespace: str, since_seconds: int) -> str:
     """ Get logs from a pod in a namespace. Returns logs of a pod in the specified namespace."""
     v1 = k8s_config.get_client()
 
     try:
-        logs = v1.read_namespaced_pod_log(pod, namespace)
+        logs = v1.read_namespaced_pod_log(pod, namespace, since_seconds=since_seconds)
         return logs
     except client.ApiException as e:
         logging.error(f"Exception when calling CoreV1Api->read_namespaced_pod_log: {e}")
