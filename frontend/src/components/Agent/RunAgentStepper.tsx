@@ -133,7 +133,7 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                                                         <Box key={subIndex} mb={2}>
                                                             {messages.map((message, msgIndex) => (
                                                                 <Box key={msgIndex}>
-                                                                    {message.content !== "" && (
+                                                                    {
                                                                         <>
                                                                             {message.type === 'human' ? (
                                                                                 <HumanMessage message={message}/>
@@ -141,11 +141,13 @@ const RunAgentStepper = ({run}: RunAgentStepperProps) => {
                                                                                 <AIMessage message={message}/>
                                                                             ) : message.type === 'tool' ? (
                                                                                 <ToolMessage message={message}/>
+                                                                            ) : message.type === 'error' ? (
+                                                                                <ToolMessage message={message}/>
                                                                             ) : (
                                                                                 <Text>Unknown message type</Text>
                                                                             )}
                                                                         </>
-                                                                    )}
+                                                                    }
                                                                 </Box>
                                                             ))}
                                                         </Box>

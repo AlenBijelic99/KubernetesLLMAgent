@@ -1,11 +1,11 @@
-import { Box, Text, Heading, Stack, useColorMode } from "@chakra-ui/react";
+import {Box, Heading, Stack, Text, useColorMode} from "@chakra-ui/react";
 
 interface AIMessageProps {
     message: any;
 }
 
-const AIMessage = ({ message }: AIMessageProps) => {
-    const { colorMode } = useColorMode();
+const AIMessage = ({message}: AIMessageProps) => {
+    const {colorMode} = useColorMode();
 
     return (
         <Box
@@ -30,6 +30,11 @@ const AIMessage = ({ message }: AIMessageProps) => {
             )}
             {Array.isArray(message.tool_calls) && message.tool_calls.length > 0 && (
                 <Stack spacing={4}>
+                    {message.error !== "" && (
+                        <Text fontSize="md">
+                            Error : {message.error}
+                        </Text>
+                    )}
                     <Heading as="h4" size="sm" color={colorMode === "dark" ? "blue.300" : "blue.700"}>
                         Calling Functions
                     </Heading>
@@ -37,17 +42,17 @@ const AIMessage = ({ message }: AIMessageProps) => {
                         <Box
                             key={index}
                             border="1px"
-                            borderColor={colorMode === "dark" ? "blue.300" : "blue.500"}
+                            borderColor={message.error !== "" ? "red.500" : colorMode === "dark" ? "blue.300" : "blue.500"}
                             borderRadius="md"
                             p={4}
                             bg={colorMode === "dark" ? "gray.800" : "white"}
                             shadow="sm"
                         >
                             <Text fontSize='sm'>{message.response_metadata.model_name}</Text>
-                            <Text fontWeight="bold" color={colorMode === "dark" ? "blue.200" : "blue.600"}>
+                            <Text fontSize='md' fontWeight="bold" color={colorMode === "dark" ? "blue.200" : "blue.600"}>
                                 {tool_call.name}
                             </Text>
-                            <Text mt={2}>{JSON.stringify(tool_call.args)}</Text>
+                            <Text fontSize='md' mt={2}>{JSON.stringify(tool_call.args)}</Text>
                         </Box>
                     ))}
                 </Stack>

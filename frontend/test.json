@@ -1,24 +1,157 @@
 {
-  "call_tool": {
+  "metric_analyser": {
     "messages": [
       {
-        "content": "[\"adservice-7f5b785778-79nmx\", \"cartservice-86dc6bd74f-48228\", \"checkoutservice-69fb7bf56d-2t9wj\", \"currencyservice-67cbc947fb-qxkrt\", \"emailservice-6c56df75b-sxdgb\", \"frontend-6d8b8f9fd5-6nmqt\", \"loadgenerator-78b4fc6bc8-clm7s\", \"paymentservice-6d67d8bcb8-5hf2p\", \"productcatalogservice-964ff77cd-9rjfq\", \"recommendationservice-5468dc4d76-gldmb\", \"redis-cart-6fccdc5fd4-9ktgv\", \"shippingservice-5dfb5b54b8-vgh6p\"]",
-        "additional_kwargs": {},
-        "response_metadata": {},
-        "type": "tool",
-        "name": "get_pod_names",
-        "id": null,
-        "tool_call_id": "call_Ppnqv4GCEmEI5EIyXfGGzQja"
-      },
-      {
-        "content": "[\"alertmanager-prometheus-kube-prometheus-alertmanager-0\", \"prometheus-grafana-78fbf8577c-r5jcb\", \"prometheus-kube-prometheus-operator-5f59c8d4df-rsjtv\", \"prometheus-kube-state-metrics-6c97d9f546-96n5b\", \"prometheus-prometheus-kube-prometheus-prometheus-0\", \"prometheus-prometheus-node-exporter-nwr4m\"]",
-        "additional_kwargs": {},
-        "response_metadata": {},
-        "type": "tool",
-        "name": "get_pod_names",
-        "id": null,
-        "tool_call_id": "call_nmnS0nHVO7KsVFzOujtsOvVS"
+        "content": "",
+        "additional_kwargs": {
+          "tool_calls": [
+            {
+              "id": "call_34BVjZGdeDPjgwqAAZLAg76W",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_9cxZsf2L8Mry3e73ENayOCe9",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_memory_usage_bytes{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_Q510bHjz3gts2MmeB35b5VD1",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_network_receive_bytes_total{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_YTwiYlQ8gBDGYsb8wBMgCtGN",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_network_transmit_bytes_total{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_UXGW2CvjjDHv5GwhxMlvzpxp",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_fTIHRgJCAD895T2uh9oLumQQ",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_memory_usage_bytes{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_AhNBIkykviDV6pJPQ2kc1cZv",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_network_receive_bytes_total{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            },
+            {
+              "id": "call_3c3tMl5BzCjbVaErZyj2OG0Y",
+              "function": {
+                "arguments": "{\"query\": \"sum(rate(container_network_transmit_bytes_total{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
+                "name": "execute_prometheus_query"
+              },
+              "type": "function"
+            }
+          ]
+        },
+        "response_metadata": {
+          "token_usage": {
+            "completion_tokens": 304,
+            "prompt_tokens": 1174,
+            "total_tokens": 1478
+          },
+          "model_name": "gpt-4o-2024-05-13",
+          "system_fingerprint": "fp_ce0793330f",
+          "finish_reason": "tool_calls",
+          "logprobs": null
+        },
+        "type": "ai",
+        "name": "metric_analyser",
+        "id": "run-e9d5948b-3906-4a1a-86a5-97f751638bf5-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_cpu_usage_seconds_total{namespace=\"boutique\"}[5m])) by (pod)"
+            },
+            "id": "call_34BVjZGdeDPjgwqAAZLAg76W"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_memory_usage_bytes{namespace=\"boutique\"}[5m])) by (pod)"
+            },
+            "id": "call_9cxZsf2L8Mry3e73ENayOCe9"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_network_receive_bytes_total{namespace=\"boutique\"}[5m])) by (pod)"
+            },
+            "id": "call_Q510bHjz3gts2MmeB35b5VD1"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_network_transmit_bytes_total{namespace=\"boutique\"}[5m])) by (pod)"
+            },
+            "id": "call_YTwiYlQ8gBDGYsb8wBMgCtGN"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_cpu_usage_seconds_total{namespace=\"apm\"}[5m])) by (pod)"
+            },
+            "id": "call_UXGW2CvjjDHv5GwhxMlvzpxp"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_memory_usage_bytes{namespace=\"apm\"}[5m])) by (pod)"
+            },
+            "id": "call_fTIHRgJCAD895T2uh9oLumQQ"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_network_receive_bytes_total{namespace=\"apm\"}[5m])) by (pod)"
+            },
+            "id": "call_AhNBIkykviDV6pJPQ2kc1cZv"
+          },
+          {
+            "name": "execute_prometheus_query",
+            "args": {
+              "query": "sum(rate(container_network_transmit_bytes_total{namespace=\"apm\"}[5m])) by (pod)"
+            },
+            "id": "call_3c3tMl5BzCjbVaErZyj2OG0Y"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1174,
+          "output_tokens": 304,
+          "total_tokens": 1478
+        }
       }
-    ]
+    ],
+    "sender": "metric_analyser"
   }
 }
