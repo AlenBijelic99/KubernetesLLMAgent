@@ -42,7 +42,7 @@ const AIMessage = ({message}: AIMessageProps) => {
                         <Box
                             key={index}
                             border="1px"
-                            borderColor={message.error !== "" ? "red.500" : colorMode === "dark" ? "blue.300" : "blue.500"}
+                            borderColor={message.error && message.error !== "" ? "red.500" : colorMode === "dark" ? "blue.300" : "blue.500"}
                             borderRadius="md"
                             p={4}
                             bg={colorMode === "dark" ? "gray.800" : "white"}

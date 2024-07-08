@@ -1,23 +1,15 @@
 import functools
 import os
 
-import yaml
 from langchain_core.messages import AIMessage, ToolMessage
 
 from app.monitoring_agent.agent import create_agent
 from app.monitoring_agent.llm import get_llm
+from app.monitoring_agent.prompts import tasks_config
 from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-
-
-def load_yaml(file_path):
-    with open(file_path, 'r') as file:
-        return yaml.safe_load(file)
-
-
-tasks_config = load_yaml(os.path.join(base_dir, 'config', 'tasks.yaml'))
 
 
 def parse_config(config):

@@ -5,8 +5,9 @@ from typing import List, Any
 from langchain_core.tools import tool
 from dotenv import load_dotenv
 from kubernetes import client
+from google.cloud import logging
 
-from app.monitoring_agent.config.k8s_config import KubernetesConfig
+from app.monitoring_agent.config.k8s_config import KubernetesConfig, GoogleCloudLogging
 
 load_dotenv()
 
@@ -16,6 +17,9 @@ k8s_config = KubernetesConfig(
     scopes=['https://www.googleapis.com/auth/cloud-platform']
 )
 
+gcloud_logging_config = GoogleCloudLogging(
+    credentials_path=os.getenv("GOOGLE_APPLICATION_CREDENTIALS_FILE")
+)
 
 @tool
 def get_pod_names(namespace: str) -> list[Any] | str:
@@ -44,16 +48,29 @@ def get_nodes_resources() -> list[Any] | str:
 
 
 @tool
-def get_pod_logs(pod: str, namespace: str, since_seconds: int) -> str:
-    """ Get logs from a pod in a namespace. Returns logs of a pod in the specified namespace."""
-    v1 = k8s_config.get_client()
+def get_pod_logs(logs_filter: str) -> str | list[Any]:
+    """
+        Get logs from a pod in a namespace. Returns logs of a pod in the specified namespace.
 
+        Parameters:
+        - logs_filter (str): The logs filter in the format of a Google Cloud Logging filter.
+
+        Returns:
+        - str: The requested logs.
+
+        Example usage:
+        >>> get_pod_logs('resource.type="k8s_container" resource.labels.project_id="plenary-stacker-422509-j4" resource.labels.location="europe-west6-a" resource.labels.cluster_name="gke-monitoring-agent" resource.labels.namespace_name="boutique" labels.k8s-pod/app="adservice" severity>=DEFAULT timestamp>="2024-07-08T16:41:00Z" timestamp<="2024-07-08T16:42:00Z"')
+        """
     try:
-        logs = v1.read_namespaced_pod_log(pod, namespace, since_seconds=since_seconds)
-        return logs
-    except client.ApiException as e:
-        logging.error(f"Exception when calling CoreV1Api->read_namespaced_pod_log: {e}")
-        return f"Exception when calling CoreV1Api->read_namespaced_pod_log: {e}"
+        logging_client = gcloud_logging_config.get_client()
+
+        entries = logging_client.list_entries(filter_=logs_filter)
+
+        return entries
+
+    except Exception as e:
+        logging.error(f"Exception when calling CoreV1Api->list_namespaced_pod: {e}")
+        return f"Exception when calling CoreV1Api->list_namespaced_pod: {e}"
 
 
 @tool

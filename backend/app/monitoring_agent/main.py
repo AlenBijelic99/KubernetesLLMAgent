@@ -140,7 +140,7 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
         # Export the graph image
         export_graph_image(graph)
 
-        namespaces = ["boutique", "apm"]
+        namespaces = ["boutique"]
 
         input = {
             "messages": [
