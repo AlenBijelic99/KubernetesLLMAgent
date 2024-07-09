@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from kubernetes import client
 from kubernetes.client import ApiClient
 from kubernetes.client.api import custom_objects_api
-from google.cloud import logging
 
 from app.monitoring_agent.config.k8s_config import KubernetesConfig, GoogleCloudLogging
 
@@ -59,9 +58,6 @@ def get_nodes_resources() -> List[Dict[str, Any]] | str:
                 'usage': usage
             })
         return node_resources
-    except client.ApiException as e:
-        logging.error(f"Exception when calling CoreV1Api->list_node: {e}")
-        return f"Exception when calling CoreV1Api->list_node: {e}"
     except Exception as e:
         logging.error(f"Exception when calling Metrics API: {e}")
         return f"Exception when calling Metrics API: {e}"
@@ -86,7 +82,11 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
 
         entries = logging_client.list_entries(filter_=logs_filter)
 
-        return entries
+        formatted_entries = []
+        for entry in entries:
+            formatted_entries.append(entry.__dict__)
+
+        return formatted_entries
 
     except Exception as e:
         logging.error(f"Exception when calling Google Cloud Logging API: {e}")

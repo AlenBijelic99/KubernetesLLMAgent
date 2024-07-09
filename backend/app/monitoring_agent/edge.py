@@ -7,6 +7,6 @@ def router(state) -> Literal["call_tool", "__end__", "continue"]:
     last_message = messages[-1]
     if last_message.tool_calls:
         return "call_tool"
-    if "UNSUCCESSFUL" or "FINISHED" in last_message.content:
+    if "UNSUCCESSFUL" in last_message.content or "FINISHED" in last_message.content:
         return "__end__"
     return "continue"

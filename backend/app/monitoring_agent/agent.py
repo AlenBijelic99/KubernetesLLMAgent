@@ -13,7 +13,8 @@ def create_agent(llm, tools, system_message: str):
         " will help where you left off. Execute what you can to make progress."
         " If you or any of the other assistants struggle with the question, you can all decide to stop,"
         " do it by prefix your response with UNSUCCESSFUL and give a summary of the progress made so far."
-        " If you successfully answer the question, do it by prefix your response with FINISHED."
+        " If you successfully answer the question and no diagnostic is needed, do it by prefix your response with "
+        "FINISHED."
     )
 
     if tools:

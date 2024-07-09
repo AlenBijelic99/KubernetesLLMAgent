@@ -9,7 +9,8 @@ tasks_config = {
             - CPU Usage: Trigger a diagnostic if the CPU usage for any pod exceeds 80% of its allocated CPU for the last 5 minutes.
             - Memory Usage: Trigger a diagnostic if the memory usage for any pod exceeds 80% of its allocated memory for the last 5 minutes.
             - Network Usage: Trigger a diagnostic if the network usage for any pod exceeds 80% of its allocated network bandwidth for the last 5 minutes.
-            To calculate percentage usage, you will need to retrieve information about the allocated resources for each pod and the available resources in the cluster.""",
+            To calculate percentage usage, you will need to retrieve information about the allocated resources for each pod and the available resources in the cluster.
+        If further diagnostics are needed, conclude your report with 'DIAGNOSTIC NEEDED'. If no further diagnostics are needed, conclude your report with 'FINISHED'.""",
         "expected_output": """A brief report that includes:
         - Identified trends and patterns in the data.
         - Any detected anomalies or unusual behavior.
@@ -29,7 +30,8 @@ tasks_config = {
         "goal": "Find the root cause of the anomaly.",
         "backstory": "A diagnostic expert who can find the root cause of the anomaly.",
         "description": "Find the root cause of the anomaly. Use the insights from the analyse_metric_task to identify "
-                       "the root cause.",
+                       "the root cause. If you find the root cause, conclude your report with 'GENERATE SOLUTIONS', "
+                       "otherwise if you cannot find the root cause, conclude your report with 'UNSUCCESSFUL'.",
         "expected_output": "A diagnostic report with the root cause of the anomaly.",
         "examples": []
     },
