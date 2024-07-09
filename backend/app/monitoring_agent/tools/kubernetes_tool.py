@@ -74,6 +74,9 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
         Returns:
         - str: The requested logs.
 
+        Notes:
+        - Always use timestamp>= and timestamp<= to filter logs by time and avoid fetching all unnecessary logs.
+
         Example usage:
         >>> get_pod_logs('resource.type="k8s_container" resource.labels.project_id="plenary-stacker-422509-j4" resource.labels.location="europe-west6-a" resource.labels.cluster_name="gke-monitoring-agent" resource.labels.namespace_name="boutique" labels.k8s-pod/app="adservice" severity>=DEFAULT timestamp>="2024-07-08T16:41:00Z" timestamp<="2024-07-08T16:42:00Z"')
         """
@@ -82,15 +85,13 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
 
         entries = logging_client.list_entries(filter_=logs_filter)
 
-        formatted_entries = []
-        for entry in entries:
-            formatted_entries.append(entry.__dict__)
+        formatted_entries = [entry.__dict__ for entry in entries]
 
         return formatted_entries
 
     except Exception as e:
-        logging.error(f"Exception when calling Google Cloud Logging API: {e}")
-        return f"Exception when calling Google Cloud Logging API: {e}"
+        logging.error(f"Exception with get_pod_logs: {e}")
+        return f"Exception with get_pod_logs: {e}"
 
 
 @tool
