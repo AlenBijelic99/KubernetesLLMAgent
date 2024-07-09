@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import uuid
+from datetime import datetime
 from typing import Any, Dict, List
 
 from PIL import Image
@@ -142,11 +143,13 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
 
         namespaces = ["boutique"]
 
+        current_time_utc = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
         input = {
             "messages": [
                 HumanMessage(
                     content=f"Check the metrics for all pods in the following namespaces {', '.join(namespaces)}, "
-                            f"and if needed run a diagnostic and find solutions to any issue."
+                            f"and if needed run a diagnostic and find solutions to any issue. Current time is {current_time_utc}"
                 )
             ],
         }

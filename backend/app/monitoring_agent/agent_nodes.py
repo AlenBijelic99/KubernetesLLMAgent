@@ -2,6 +2,7 @@ import functools
 import os
 
 from langchain_core.messages import AIMessage, ToolMessage
+from langchain_openai import ChatOpenAI
 
 from app.monitoring_agent.agent import create_agent
 from app.monitoring_agent.llm import get_llm
@@ -31,8 +32,7 @@ def agent_node(state, agent, name):
         "sender": name,
     }
 
-
-llm = get_llm()
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 metric_analyser_agent = create_agent(
     llm,
