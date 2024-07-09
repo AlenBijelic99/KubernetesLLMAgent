@@ -21,12 +21,6 @@ tasks_config = {
                 "tool": "execute_prometheus_query",
                 "tool_input": 'sum(rate(container_cpu_usage_seconds_total{namespace="default"}[5m])) by (pod)',
                 "tool_response": '{pod="pod1"}: 0.85\n{pod="pod2"}: 0.65'
-            },
-            {
-                "user": "Get memory usage for the past 5 minutes for all pods in the 'default' namespace.",
-                "tool": "execute_prometheus_query",
-                "tool_input": 'sum(rate(container_memory_usage_bytes{namespace="default"}[5m])) by (pod)',
-                "tool_response": '{pod="pod1"}: 80000000\n{pod="pod2"}: 65000000'
             }
         ]
     },

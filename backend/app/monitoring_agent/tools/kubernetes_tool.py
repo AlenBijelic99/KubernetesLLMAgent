@@ -1,10 +1,12 @@
 import logging
 import os
-from typing import List, Any
+from typing import List, Any, Dict
 
 from langchain_core.tools import tool
 from dotenv import load_dotenv
 from kubernetes import client
+from kubernetes.client import ApiClient
+from kubernetes.client.api import custom_objects_api
 from google.cloud import logging
 
 from app.monitoring_agent.config.k8s_config import KubernetesConfig, GoogleCloudLogging
@@ -21,6 +23,7 @@ gcloud_logging_config = GoogleCloudLogging(
     credentials_path=os.getenv("GOOGLE_APPLICATION_CREDENTIALS_FILE")
 )
 
+
 @tool
 def get_pod_names(namespace: str) -> list[Any] | str:
     """Get pods in given namespace. Returns a list of pod names in the specified namespace."""
@@ -35,16 +38,33 @@ def get_pod_names(namespace: str) -> list[Any] | str:
 
 
 @tool
-def get_nodes_resources() -> list[Any] | str:
-    """Get nodes resources. Returns a list of nodes resources."""
+def get_nodes_resources() -> List[Dict[str, Any]] | str:
+    """Get nodes resources. Returns a list of nodes resources including capacity and usage."""
     v1 = k8s_config.get_client()
-
     try:
         nodes = v1.list_node()
-        return [node.status.capacity for node in nodes.items]
+        metrics_api = custom_objects_api.CustomObjectsApi(ApiClient())
+        node_metrics = metrics_api.list_cluster_custom_object(
+            "metrics.k8s.io", "v1beta1", "nodes"
+        )
+        node_resources = []
+        for node in nodes.items:
+            capacity = node.status.capacity
+            allocatable = node.status.allocatable
+            usage = next((item['usage'] for item in node_metrics['items'] if item['metadata']['name'] == node.metadata.name), {})
+            node_resources.append({
+                'node': node.metadata.name,
+                'capacity': capacity,
+                'allocatable': allocatable,
+                'usage': usage
+            })
+        return node_resources
     except client.ApiException as e:
         logging.error(f"Exception when calling CoreV1Api->list_node: {e}")
         return f"Exception when calling CoreV1Api->list_node: {e}"
+    except Exception as e:
+        logging.error(f"Exception when calling Metrics API: {e}")
+        return f"Exception when calling Metrics API: {e}"
 
 
 @tool
@@ -69,8 +89,8 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
         return entries
 
     except Exception as e:
-        logging.error(f"Exception when calling CoreV1Api->list_namespaced_pod: {e}")
-        return f"Exception when calling CoreV1Api->list_namespaced_pod: {e}"
+        logging.error(f"Exception when calling Google Cloud Logging API: {e}")
+        return f"Exception when calling Google Cloud Logging API: {e}"
 
 
 @tool

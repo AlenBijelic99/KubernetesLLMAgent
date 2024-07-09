@@ -24,23 +24,26 @@ def execute_prometheus_query(query: str) -> str:
     '{pod="details-v1-5997599bc6-vqzjq"}: 0'
     """
 
-    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    try:
+        prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
 
-    # Connect to Prometheus
-    prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
+        # Connect to Prometheus
+        prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
 
-    if not prometheus.check_prometheus_connection():
-        return "Prometheus is not available"
+        if not prometheus.check_prometheus_connection():
+            return "Prometheus is not available"
 
-    # Sanitize input to avoid injection
-    sanitized_query = re.sub(r'[^\w\s{}[\]:,=()\-\'"]', '', query.replace('\\"', '"'))
+        # Sanitize input to avoid injection
+        sanitized_query = re.sub(r'[^\w\s{}[\]:,=()\-\'"]', '', query.replace('\\"', '"'))
 
-    # Execute the query
-    data = prometheus.custom_query(query=sanitized_query)
-    if not data:
-        return "No data found"
+        # Execute the query
+        data = prometheus.custom_query(query=sanitized_query)
+        if not data:
+            return "No data found"
 
-    # Format the output
-    result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
+        # Format the output
+        result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
 
-    return result
+        return result
+    except Exception as e:
+        return f"Error executing Prometheus query: {e}"

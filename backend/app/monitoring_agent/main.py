@@ -2,7 +2,7 @@ import io
 import json
 import logging
 import uuid
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from PIL import Image
 from dotenv import load_dotenv
@@ -145,7 +145,8 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
         input = {
             "messages": [
                 HumanMessage(
-                    content=f"Check the metrics for all pods in the following namespaces {', '.join(namespaces)}."
+                    content=f"Check the metrics for all pods in the following namespaces {', '.join(namespaces)}, "
+                            f"and if needed run a diagnostic and find solutions to any issue."
                 )
             ],
         }

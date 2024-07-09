@@ -12,7 +12,8 @@ def create_agent(llm, tools, system_message: str):
         " If you are unable to fully answer, that's OK, another assistant with different tools "
         " will help where you left off. Execute what you can to make progress."
         " If you or any of the other assistants struggle with the question, you can all decide to stop,"
-        " do it by prefix your response with FINAL ANSWER and give a summary of the progress made so far."
+        " do it by prefix your response with UNSUCCESSFUL and give a summary of the progress made so far."
+        " If you successfully answer the question, do it by prefix your response with FINISHED."
     )
 
     if tools:
