@@ -1,157 +1,56 @@
-{
-  "metric_analyser": {
-    "messages": [
-      {
-        "content": "",
-        "additional_kwargs": {
-          "tool_calls": [
-            {
-              "id": "call_34BVjZGdeDPjgwqAAZLAg76W",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_9cxZsf2L8Mry3e73ENayOCe9",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_memory_usage_bytes{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_Q510bHjz3gts2MmeB35b5VD1",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_network_receive_bytes_total{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_YTwiYlQ8gBDGYsb8wBMgCtGN",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_network_transmit_bytes_total{namespace=\\\"boutique\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_UXGW2CvjjDHv5GwhxMlvzpxp",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_cpu_usage_seconds_total{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_fTIHRgJCAD895T2uh9oLumQQ",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_memory_usage_bytes{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_AhNBIkykviDV6pJPQ2kc1cZv",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_network_receive_bytes_total{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            },
-            {
-              "id": "call_3c3tMl5BzCjbVaErZyj2OG0Y",
-              "function": {
-                "arguments": "{\"query\": \"sum(rate(container_network_transmit_bytes_total{namespace=\\\"apm\\\"}[5m])) by (pod)\"}",
-                "name": "execute_prometheus_query"
-              },
-              "type": "function"
-            }
-          ]
+[
+  {
+    'name': 'execute_prometheus_query',
+    'description': 'Executes a custom Prometheus query with the prometheus_api_client and returns the result.\n\nParameters:\n- query (str): The PromQL query to execute without query\n\nReturns:\n- str: The result of the query in a readable format.\n\nExample usage:\n>>> execute_prometheus_query(\'sum(rate(container_cpu_usage_seconds_total{namespace="bookinfo", pod="details-v1-5997599bc6-vqzjq"}[5m])) by (pod)\')\n\'{pod="details-v1-5997599bc6-vqzjq"}: 0\'',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'tool_input': {
+          'type': 'string'
         },
-        "response_metadata": {
-          "token_usage": {
-            "completion_tokens": 304,
-            "prompt_tokens": 1174,
-            "total_tokens": 1478
-          },
-          "model_name": "gpt-4o-2024-05-13",
-          "system_fingerprint": "fp_ce0793330f",
-          "finish_reason": "tool_calls",
-          "logprobs": null
-        },
-        "type": "ai",
-        "name": "metric_analyser",
-        "id": "run-e9d5948b-3906-4a1a-86a5-97f751638bf5-0",
-        "example": false,
-        "tool_calls": [
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_cpu_usage_seconds_total{namespace=\"boutique\"}[5m])) by (pod)"
-            },
-            "id": "call_34BVjZGdeDPjgwqAAZLAg76W"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_memory_usage_bytes{namespace=\"boutique\"}[5m])) by (pod)"
-            },
-            "id": "call_9cxZsf2L8Mry3e73ENayOCe9"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_network_receive_bytes_total{namespace=\"boutique\"}[5m])) by (pod)"
-            },
-            "id": "call_Q510bHjz3gts2MmeB35b5VD1"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_network_transmit_bytes_total{namespace=\"boutique\"}[5m])) by (pod)"
-            },
-            "id": "call_YTwiYlQ8gBDGYsb8wBMgCtGN"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_cpu_usage_seconds_total{namespace=\"apm\"}[5m])) by (pod)"
-            },
-            "id": "call_UXGW2CvjjDHv5GwhxMlvzpxp"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_memory_usage_bytes{namespace=\"apm\"}[5m])) by (pod)"
-            },
-            "id": "call_fTIHRgJCAD895T2uh9oLumQQ"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_network_receive_bytes_total{namespace=\"apm\"}[5m])) by (pod)"
-            },
-            "id": "call_AhNBIkykviDV6pJPQ2kc1cZv"
-          },
-          {
-            "name": "execute_prometheus_query",
-            "args": {
-              "query": "sum(rate(container_network_transmit_bytes_total{namespace=\"apm\"}[5m])) by (pod)"
-            },
-            "id": "call_3c3tMl5BzCjbVaErZyj2OG0Y"
-          }
-        ],
-        "invalid_tool_calls": [],
-        "usage_metadata": {
-          "input_tokens": 1174,
-          "output_tokens": 304,
-          "total_tokens": 1478
+        'callbacks': {
+          'type': 'string'
         }
-      }
-    ],
-    "sender": "metric_analyser"
+      },
+      'required': [
+        'tool_input'
+      ]
+    }
+  },
+  {
+    'name': 'get_pod_logs',
+    'description': 'Get logs from a pod in a namespace. Returns logs of a pod in the specified namespace.\n\nParameters:\n- logs_filter (str): The logs filter in the format of a Google Cloud Logging filter.\n\nReturns:\n- str: The requested logs.\n\nNotes:\n- Always use timestamp>= and timestamp<= to filter logs by time and avoid fetching all unnecessary logs.\n\nExample usage:\n>>> get_pod_logs(\'resource.type="k8s_container" resource.labels.project_id="plenary-stacker-422509-j4" resource.labels.location="europe-west6-a" resource.labels.cluster_name="gke-monitoring-agent" resource.labels.namespace_name="boutique" labels.k8s-pod/app="adservice" severity>=DEFAULT timestamp>="2024-07-08T16:41:00Z" timestamp<="2024-07-08T16:42:00Z"\')',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'tool_input': {
+          'type': 'string'
+        },
+        'callbacks': {
+          'type': 'string'
+        }
+      },
+      'required': [
+        'tool_input'
+      ]
+    }
+  },
+  {
+    'name': 'get_pod_yaml',
+    'description': 'Get pod YAML configuration in a namespace. Returns the YAML configuration of a pod in the specified namespace.',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'tool_input': {
+          'type': 'string'
+        },
+        'callbacks': {
+          'type': 'string'
+        }
+      },
+      'required': [
+        'tool_input'
+      ]
+    }
   }
-}
+]
