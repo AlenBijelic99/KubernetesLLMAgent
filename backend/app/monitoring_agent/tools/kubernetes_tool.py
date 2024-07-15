@@ -37,6 +37,33 @@ def get_pod_names(namespace: str) -> list[Any] | str:
 
 
 @tool
+def get_pod_resources(pod: str, namespace: str) -> Dict[str, Any] | str:
+    """Get resources allocated to a specific pod in a namespace. Returns a dictionary with resource requests and limits."""
+    v1 = k8s_config.get_client()
+
+    try:
+        pod_info = v1.read_namespaced_pod(pod, namespace)
+        containers = pod_info.spec.containers
+        resources = {
+            'pod': pod,
+            'namespace': namespace,
+            'containers': []
+        }
+
+        for container in containers:
+            container_resources = {
+                'name': container.name,
+                'requests': container.resources.requests if container.resources.requests else {},
+                'limits': container.resources.limits if container.resources.limits else {}
+            }
+            resources['containers'].append(container_resources)
+
+        return resources
+    except client.ApiException as e:
+        logging.error(f"Exception when calling CoreV1Api->read_namespaced_pod: {e}")
+        return f"Exception when calling CoreV1Api->read_namespaced_pod: {e}"
+
+@tool
 def get_nodes_resources() -> List[Dict[str, Any]] | str:
     """Get nodes resources. Returns a list of nodes resources including capacity and usage."""
     v1 = k8s_config.get_client()
@@ -83,7 +110,7 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
     try:
         logging_client = gcloud_logging_config.get_client()
 
-        entries = logging_client.list_entries(filter_=logs_filter)
+        entries = logging_client.list_entries(filter_=logs_filter, page_size=50)
 
         formatted_entries = [entry.__dict__ for entry in entries]
 

@@ -10,6 +10,7 @@ tasks_config = {
             - Memory Usage: Trigger a diagnostic if the memory usage for any pod exceeds 80% of its allocated memory for the last 5 minutes.
             - Network Usage: Trigger a diagnostic if the network usage for any pod exceeds 80% of its allocated network bandwidth for the last 5 minutes.
             - HTTP Requests per Second: Trigger a diagnostic if the number of HTTP requests per second for any pod exceeds 100 requests per second for the last 5 minutes.
+            - HTTP latency: Trigger a diagnostic if the HTTP latency for any pod exceeds 0.3 seconds for the last 5 minutes.
             To calculate percentage usage, you will need to retrieve information about the allocated resources for each pod and the available resources in the cluster.
         If further diagnostics are needed, conclude your report with 'DIAGNOSTIC NEEDED'. If no further diagnostics are needed, conclude your report with 'FINISHED'.""",
         "expected_output": """A brief report that includes:

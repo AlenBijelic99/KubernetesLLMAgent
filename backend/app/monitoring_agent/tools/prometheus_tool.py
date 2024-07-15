@@ -23,6 +23,9 @@ def execute_prometheus_query(query: str) -> str:
     Returns the CPU usage of a specific pod in the last 5 minutes:
     >>> execute_prometheus_query('sum(rate(container_cpu_usage_seconds_total{namespace="bookinfo", pod="details-v1-5997599bc6-vqzjq"}[5m])) by (pod)')
     '{pod="details-v1-5997599bc6-vqzjq"}: 0'
+    An example of a query that returns HTTP requests per second by job, which is the name of the app
+    >>> execute_prometheus_query('sum(rate(http_requests_total{namespace="testing-apps"}[5m])) by (job)')
+    '{job="metric-app"}: 0'
     """
 
     try:
@@ -34,13 +37,19 @@ def execute_prometheus_query(query: str) -> str:
         if not prometheus.check_prometheus_connection():
             return "Prometheus is not available"
 
+        print("Initial query:", query)
+
         # Sanitize input to avoid injection
-        sanitized_query = re.sub(r'[^\w\s{}[\]:,=()\-\'"]', '', query.replace('\\"', '"'))
+        sanitized_query = query.replace('\\"', '"')
+
+        print("Sanitized query:", sanitized_query)
 
         # Execute the query
         data = prometheus.custom_query(query=sanitized_query)
         if not data:
             return "No data found"
+
+        print("Raw data from Prometheus:", data)
 
         # Format the output
         result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
