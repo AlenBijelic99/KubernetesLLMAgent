@@ -23,7 +23,8 @@ def get_llm(tools):
                 base_url=ollama_base_url,
                 keep_alive=-1,
                 temperature=0,
-                max_new_tokens=512
+                max_new_tokens=512,
+                format="json"
             )
         else:
             return Ollama(
