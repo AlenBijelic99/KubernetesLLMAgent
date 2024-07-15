@@ -22,11 +22,11 @@ from app.monitoring_agent.agent_nodes import metric_analyser_node, diagnostic_no
 from app.monitoring_agent.edge import router
 from app.monitoring_agent.graph import AgentState
 from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml
-from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
+from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query, get_http_request_per_seconds_by_job
 
 load_dotenv()
 
-tools = [get_pod_names, execute_prometheus_query, get_pod_logs, get_nodes_resources, get_pod_yaml]
+tools = [get_pod_names, execute_prometheus_query, get_pod_logs, get_nodes_resources, get_pod_yaml, get_http_request_per_seconds_by_job]
 tool_node = ToolNode(tools)
 
 
@@ -141,7 +141,7 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
         # Export the graph image
         export_graph_image(graph)
 
-        namespaces = ["boutique"]
+        namespaces = ["sock-shop"]
 
         current_time_utc = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -158,7 +158,8 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
 
         async for event in graph.astream(
                 input,
-                stream_mode="updates"
+                stream_mode="updates",
+                config={"recursion_limit": 30},
         ):
             print(event)
 

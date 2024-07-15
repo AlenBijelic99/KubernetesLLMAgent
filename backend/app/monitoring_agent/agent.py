@@ -2,6 +2,10 @@ import logging
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_experimental.llms.ollama_functions import OllamaFunctions
+from langchain_openai import ChatOpenAI
+
+from app.monitoring_agent.tools.tool_binder import extract_tool_metadata
 
 
 def create_agent(llm, tools, system_message: str):
@@ -13,8 +17,8 @@ def create_agent(llm, tools, system_message: str):
         " will help where you left off. Execute what you can to make progress."
         " If you or any of the other assistants struggle with the question, you can all decide to stop,"
         " do it by prefix your response with UNSUCCESSFUL and give a summary of the progress made so far."
-        " If you successfully answer the question and no diagnostic is needed, do it by prefix your response with "
-        "FINISHED."
+        " If you successfully answer the question and no diagnostic is needed, do it by prefix your response with"
+        " FINISHED."
     )
 
     if tools:
@@ -32,7 +36,17 @@ def create_agent(llm, tools, system_message: str):
 
     if tools:
         prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
-        # TODO: Need to find a solution to bind tool in Ollama way. Here bind_tools is defined in langchain for ChatGPT
-        return prompt | llm.bind_tools(tools)
+
+    if tools:
+        if isinstance(llm, ChatOpenAI):
+            prompt_with_llm = prompt | llm.bind_tools(tools)
+        elif isinstance(llm, OllamaFunctions):
+            binded_tools = [extract_tool_metadata(tool) for tool in tools]
+            print("binded_tools: ", binded_tools)
+            prompt_with_llm = prompt | llm.bind_tools(tools=tools)
+        else:
+            raise Exception("Unsupported LLM model")
     else:
-        return prompt | llm
+        prompt_with_llm = prompt | llm
+
+    return prompt_with_llm

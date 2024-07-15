@@ -20,6 +20,7 @@ def execute_prometheus_query(query: str) -> str:
     - str: The result of the query in a readable format.
 
     Example usage:
+    Returns the CPU usage of a specific pod in the last 5 minutes:
     >>> execute_prometheus_query('sum(rate(container_cpu_usage_seconds_total{namespace="bookinfo", pod="details-v1-5997599bc6-vqzjq"}[5m])) by (pod)')
     '{pod="details-v1-5997599bc6-vqzjq"}: 0'
     """
@@ -47,3 +48,25 @@ def execute_prometheus_query(query: str) -> str:
         return result
     except Exception as e:
         return f"Error executing Prometheus query: {e}"
+
+@tool
+def get_http_request_per_seconds_by_job(job: str) -> str:
+    """
+    Get the HTTP request per seconds for a specific job in the last minute.
+
+    Parameters:
+    - job (str): The job name to filter the request duration. It is made of {namespace}-{service name}.
+
+    Returns:
+    - str: The request duration for the specified job in the last minute.
+
+    Notes:
+    - Not all jobs may have HTTP requests, so the result may be 0 or No data found.
+
+    Example usage:
+    >>> get_http_request_per_seconds_by_job('sock-shop-user')
+    '{job="sock-shop-user"}: 0.7'
+    """
+
+    query = f'sum(rate(request_duration_seconds_count{{job="{job}"}}[1m])) by (job)'
+    return execute_prometheus_query(query)
