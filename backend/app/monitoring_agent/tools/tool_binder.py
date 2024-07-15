@@ -1,5 +1,5 @@
 import inspect
-from typing import Callable, Dict, Any
+from typing import Dict, Any
 
 
 def extract_tool_metadata(tool_func) -> Dict[str, Any]:
@@ -14,7 +14,7 @@ def extract_tool_metadata(tool_func) -> Dict[str, Any]:
     for name, param in signature.parameters.items():
         param_type = param.annotation
 
-        if name is "callbacks":
+        if name == "callbacks":
             break
 
         if param.default == param.empty:

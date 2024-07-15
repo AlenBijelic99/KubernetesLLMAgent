@@ -1,6 +1,6 @@
 tasks_config = {
     "analyse_metric_task": {
-        "role": "Prometheus metrics analyser",
+        "role": "Metrics analyser",
         "goal": "Analyse metrics of an application deployed in a Kubernetes cluster using Prometheus, "
                 "provide detailed insights and decide whether or not a diagnosis is necessary to resolve any problem.",
         "backstory": "A monitoring expert who can analyse metrics from Prometheus to derive accurate insights and "
@@ -9,6 +9,7 @@ tasks_config = {
             - CPU Usage: Trigger a diagnostic if the CPU usage for any pod exceeds 80% of its allocated CPU for the last 5 minutes.
             - Memory Usage: Trigger a diagnostic if the memory usage for any pod exceeds 80% of its allocated memory for the last 5 minutes.
             - Network Usage: Trigger a diagnostic if the network usage for any pod exceeds 80% of its allocated network bandwidth for the last 5 minutes.
+            - HTTP Requests per Second: Trigger a diagnostic if the number of HTTP requests per second for any pod exceeds 100 requests per second for the last 5 minutes.
             To calculate percentage usage, you will need to retrieve information about the allocated resources for each pod and the available resources in the cluster.
         If further diagnostics are needed, conclude your report with 'DIAGNOSTIC NEEDED'. If no further diagnostics are needed, conclude your report with 'FINISHED'.""",
         "expected_output": """A brief report that includes:

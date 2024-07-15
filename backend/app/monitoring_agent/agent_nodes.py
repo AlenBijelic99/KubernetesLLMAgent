@@ -9,7 +9,7 @@ from app.monitoring_agent.agent import create_agent
 from app.monitoring_agent.llm import get_llm
 from app.monitoring_agent.prompts import tasks_config
 from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml
-from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
+from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query, get_http_request_per_seconds_by_job
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,13 +34,11 @@ def agent_node(state, agent, name):
     }
 
 
-
-metric_analyser_tools = [get_pod_names, execute_prometheus_query, get_nodes_resources]
-diagnostic_tools = [execute_prometheus_query, get_pod_logs, get_pod_yaml]
+metric_analyser_tools = [get_pod_names, execute_prometheus_query, get_nodes_resources,
+                         get_http_request_per_seconds_by_job]
+diagnostic_tools = [execute_prometheus_query, get_pod_logs, get_pod_yaml, get_http_request_per_seconds_by_job]
 solution_tools = []
 incident_tools = []
-
-
 
 metric_analyser_agent = create_agent(
     get_llm(metric_analyser_tools),
