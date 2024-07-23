@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Fa
 from sqlalchemy.orm import joinedload
 from sqlmodel import select, desc
 
-from app.api.deps import SessionDep
+from app.api.deps import SessionDep, CurrentUser
 from app.crud import create_run
 from app.models import AgentRun, AgentRunsPublic, Event, AgentRunPublic, AgentRunAndEventsPublic
 
@@ -19,6 +19,9 @@ router = APIRouter()
 
 @router.post("/run")
 async def run_agent(session: SessionDep):
+    """
+    Run the agent
+    """
     logging.warning("Running agent")
     try:
         agent_run = create_run(session)
@@ -32,7 +35,10 @@ async def run_agent(session: SessionDep):
 
 
 @router.get("/runs", response_model=AgentRunsPublic)
-async def get_runs(session: SessionDep) -> AgentRunsPublic:
+async def get_runs(session: SessionDep, current_user: CurrentUser) -> AgentRunsPublic:
+    """
+    Get all agent executions
+    """
     logging.warning("Getting runs")
 
     runs = session.exec(select(AgentRun).order_by(desc(AgentRun.start_time)))
@@ -41,7 +47,10 @@ async def get_runs(session: SessionDep) -> AgentRunsPublic:
 
 
 @router.get("/run/{id}", response_model=AgentRunAndEventsPublic)
-async def get_run(session: SessionDep, id: uuid.UUID) -> AgentRunAndEventsPublic:
+async def get_run(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> AgentRunAndEventsPublic:
+    """
+    Get an agent execution by id
+    """
     run = session.get(AgentRun, id)
 
     run.events.sort(key=lambda e: e.inserted_at)

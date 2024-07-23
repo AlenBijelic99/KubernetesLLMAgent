@@ -1,6 +1,34 @@
 # Kubernetes AI Agent - Backend
 
+The Full Stack FastAPI frontend documentation can be found [down below](#fastapi-project---backend)
 
+## Code Structure
+
+The backend code is structured as follows:
+
+* `backend/app/alembic` - The directory with the Alembic migrations.
+* `backend/app/api` - The different API endpoints of the backend.
+* `backend/app/core` - The core functionality of the backend, such as the database connection and the security.
+* `backend/app/monitoring_agent` - The LLM agent using LangGraph.
+* `backend/app/tests` - The tests of the backend.
+* `backend/app/web` - The WebSocket connection to retrieve runs in real-time.
+* `backend/crud.py` - The CRUD (Create, Read, Update, Delete) utils.
+* `backend/main.py` - The FastAPI application creation and configuration.
+
+## Monitoring Agent
+
+
+
+## API
+
+The API is built with [FastAPI](https://fastapi.tiangolo.com/). In `backend/app/api` you can find the different endpoints of the API. Routes concerning the agent are in the `agent.py` file. There are 3 routes in this file:
+* `POST /agent/run` - To run the agent.
+* `GET /agent/runs` - To get the list of runs.
+* `GET /agent/run/{run_id}` - To get the details of a run.
+
+All these routes are only available if the user is authenticated. The verification is made by passing the `CurrentUser` object to the route. This object is created by the `get_current_user` method in the `backend/app/api/deps.py` file. This method uses the `OAuth2PasswordBearer` to get the token from the request and then the `jwt.decode` method to decode the token and get the user information.
+
+All available routes are documented using [Swagger UI](https://swagger.io/tools/swagger-ui/). You can access the documentation at `http://localhost:8080/docs`.
 
 
 # FastAPI Project - Backend
