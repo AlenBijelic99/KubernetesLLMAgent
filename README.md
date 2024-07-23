@@ -1,55 +1,19 @@
-# Full Stack FastAPI Template
+# Kubernetes AI Agent
 
-<a href="https://github.com/tiangolo/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/tiangolo/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
-<a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/tiangolo/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/tiangolo/full-stack-fastapi-template.svg" alt="Coverage"></a>
+A large language model agent capable of monitoring a Kubernetes cluster. This agent can be used to analyse metrics and logs to run diagnostics if any issue is detected, identifying the root cause of the problem. The agent will then provide a solution to the problem and document each step in an incident report.
 
-## Technology Stack and Features
+This project is the result of the Bachelor’s final project by Alen Bijelic during his final year at the School of Engineering and Management, Haute Ecole d'Ingénierie et de Gestion du Canton de Vaud (HEIG-VD). The project was supervised by Prof. Marcel Graf.
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-    - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-    - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-    - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-    - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
-    - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
-    - 🤖 An automatically generated frontend client.
-    - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+## Agent workflow
 
-### Dashboard Login
+![Graph flow](img/realisation_langgraphworkflow.png)
 
-[![API docs](img/login.png)](https://github.com/tiangolo/full-stack-fastapi-template)
+## Technology Stack
+- [**Full Stack FastAPI Template**](https://github.com/tiangolo/full-stack-fastapi-template) for the backend, frontend and DB.
+- [**LangGraph**](https://langchain-ai.github.io/langgraph/) and [**LangChain**](https://www.langchain.com/) for the AI agent.
+- [**Google Kubernetes Engine**](https://cloud.google.com/kubernetes-engine) for the Kubernetes cluster.
+- [**Prometheus**](https://prometheus.io/) for monitoring.
 
-### Dashboard - Admin
-
-[![API docs](img/dashboard.png)](https://github.com/tiangolo/full-stack-fastapi-template)
-
-### Dashboard - Create User
-
-[![API docs](img/dashboard-create.png)](https://github.com/tiangolo/full-stack-fastapi-template)
-
-### Dashboard - Items
-
-[![API docs](img/dashboard-items.png)](https://github.com/tiangolo/full-stack-fastapi-template)
-
-### Dashboard - User Settings
-
-[![API docs](img/dashboard-user-settings.png)](https://github.com/tiangolo/full-stack-fastapi-template)
-
-### Dashboard - Dark Mode
-
-[![API docs](img/dashboard-dark.png)](https://github.com/tiangolo/full-stack-fastapi-template)
-
-### Interactive API Documentation
-
-[![API docs](img/docs.png)](https://github.com/tiangolo/full-stack-fastapi-template)
 
 ## How To Use It
 
@@ -229,10 +193,6 @@ General development docs: [development.md](./development.md).
 
 This includes using Docker Compose, custom local domains, `.env` configurations, etc.
 
-## Release Notes
-
-Check the file [release-notes.md](./release-notes.md).
-
 ## License
 
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+The Kubernetes AI Agent is licensed under the terms of the MIT license.

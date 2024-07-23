@@ -30,7 +30,7 @@ const AIMessage = ({message}: AIMessageProps) => {
             )}
             {Array.isArray(message.tool_calls) && message.tool_calls.length > 0 && (
                 <Stack spacing={4}>
-                    {message.error !== "" && (
+                    {message.error && message.error !== "" && (
                         <Text fontSize="md">
                             Error : {message.error}
                         </Text>

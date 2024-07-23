@@ -1,0 +1,45 @@
+% template.tex
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{fancyhdr}
+\usepackage{fancyvrb}
+\usepackage{xcolor}
+\usepackage{minted} % Pour les listings de code source
+\usepackage{framed} % Pour les environnements Shaded
+\usepackage{fvextra} % Pour des fonctionnalités supplémentaires avec fancyvrb
+
+% Définir \tightlist pour éviter l'erreur
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+% Configuration de l'en-tête et du pied de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Titre de l'annexe} % Titre de l'annexe à gauche
+\fancyhead[R]{\thepage}  % Numéro de page à droite
+
+% Configuration des retours à la ligne pour minted
+\setminted{breaklines=true, breakanywhere=true}
+
+% Définition de l'environnement Shaded
+\definecolor{shadecolor}{RGB}{240,240,240}
+
+% Informations du document
+\title{Titre de l'annexe}
+\author{Nom de l'auteur}
+\date{\today}
+
+\begin{document}
+
+% Titre de l'annexe
+\maketitle
+
+\tableofcontents
+
+$body$
+
+\end{document}
