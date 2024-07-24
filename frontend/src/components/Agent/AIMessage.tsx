@@ -4,14 +4,14 @@ import remarkGfm from 'remark-gfm'; // For extended Markdown syntax
 
 // Custom components for ReactMarkdown
 const MarkdownComponents = {
-    h1: ({ children }) => <Heading as="h1" size="xl" mt={4} mb={2}>{children}</Heading>,
-    h2: ({ children }) => <Heading as="h2" size="lg" mt={4} mb={2}>{children}</Heading>,
-    h3: ({ children }) => <Heading as="h3" size="md" mt={4} mb={2}>{children}</Heading>,
-    h4: ({ children }) => <Heading as="h4" size="sm" mt={4} mb={2}>{children}</Heading>,
-    ul: ({ children }) => <UnorderedList pl={4} mb={2}>{children}</UnorderedList>,
-    ol: ({ children }) => <OrderedList pl={4} mb={2}>{children}</OrderedList>,
-    li: ({ children }) => <ListItem as="li" mb={1}>{children}</ListItem>,
-    p: ({ children }) => <Text mb={2}>{children}</Text>
+    h1: ({ children }: any) => <Heading as="h1" size="xl" mt={4} mb={2}>{children}</Heading>,
+    h2: ({ children }: any) => <Heading as="h2" size="lg" mt={4} mb={2}>{children}</Heading>,
+    h3: ({ children }: any) => <Heading as="h3" size="md" mt={4} mb={2}>{children}</Heading>,
+    h4: ({ children }: any) => <Heading as="h4" size="sm" mt={4} mb={2}>{children}</Heading>,
+    ul: ({ children }: any) => <UnorderedList pl={4} mb={2}>{children}</UnorderedList>,
+    ol: ({ children }: any) => <OrderedList pl={4} mb={2}>{children}</OrderedList>,
+    li: ({ children }: any) => <ListItem as="li" mb={1}>{children}</ListItem>,
+    p: ({ children }: any) => <Text mb={2}>{children}</Text>
 };
 
 interface AIMessageProps {
