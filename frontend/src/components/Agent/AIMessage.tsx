@@ -1,18 +1,5 @@
-import {Box, Heading, ListItem, OrderedList, Stack, Text, UnorderedList, useColorMode} from "@chakra-ui/react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from 'remark-gfm'; // For extended Markdown syntax
+import {Box, Heading, Stack, Text, useColorMode} from "@chakra-ui/react";
 
-// Custom components for ReactMarkdown
-const MarkdownComponents = {
-    h1: ({ children }: any) => <Heading as="h1" size="xl" mt={4} mb={2}>{children}</Heading>,
-    h2: ({ children }: any) => <Heading as="h2" size="lg" mt={4} mb={2}>{children}</Heading>,
-    h3: ({ children }: any) => <Heading as="h3" size="md" mt={4} mb={2}>{children}</Heading>,
-    h4: ({ children }: any) => <Heading as="h4" size="sm" mt={4} mb={2}>{children}</Heading>,
-    ul: ({ children }: any) => <UnorderedList pl={4} mb={2}>{children}</UnorderedList>,
-    ol: ({ children }: any) => <OrderedList pl={4} mb={2}>{children}</OrderedList>,
-    li: ({ children }: any) => <ListItem as="li" mb={1}>{children}</ListItem>,
-    p: ({ children }: any) => <Text mb={2}>{children}</Text>
-};
 
 interface AIMessageProps {
     message: any;
@@ -37,17 +24,15 @@ const AIMessage = ({ message }: AIMessageProps) => {
                     <Heading as="h3" size="md" mb={2} color={colorMode === "dark" ? "teal.300" : "teal.700"}>
                         AI Message
                     </Heading>
-                    <Box
+                    <Text
                         fontSize='md'
                         mb={4}
                         p={2}
                         bg={colorMode === "dark" ? "gray.800" : "white"}
                         borderRadius="md"
                     >
-                        <ReactMarkdown components={MarkdownComponents} remarkPlugins={[remarkGfm]}>
-                            {message.content}
-                        </ReactMarkdown>
-                    </Box>
+                        {message.content}
+                    </Text>
                 </>
             )}
             {Array.isArray(message.tool_calls) && message.tool_calls.length > 0 && (
