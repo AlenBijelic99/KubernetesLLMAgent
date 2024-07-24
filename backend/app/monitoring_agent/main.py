@@ -1,5 +1,6 @@
 import io
 import logging
+import os
 import uuid
 from datetime import datetime
 from typing import Any, Dict
@@ -138,7 +139,7 @@ async def run(web_socket_manager, session: SessionDep, run_id: uuid.UUID):
         # Export the graph image
         export_graph_image(graph)
 
-        namespaces = ["testing-apps"]
+        namespaces = os.getenv("NAMESPACES", "default").split(',')
 
         current_time_utc = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
 
