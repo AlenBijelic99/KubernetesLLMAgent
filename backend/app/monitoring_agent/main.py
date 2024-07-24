@@ -1,26 +1,22 @@
 import io
-import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from PIL import Image
 from dotenv import load_dotenv
-from fastapi import Depends
-from kubernetes import client
-from langchain_core.messages import HumanMessage, ToolMessage, AIMessage, BaseMessage
+from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 from langgraph.constants import END
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode
-from sqlmodel import Session
 
 from app.api.deps import SessionDep
 from app.crud import create_event, set_run_status
 from app.monitoring_agent.agent_nodes import metric_analyser_node, diagnostic_node, solution_node, \
     incident_reporter_node
 from app.monitoring_agent.edge import router
-from app.monitoring_agent.graph import AgentState
+from app.monitoring_agent.state import AgentState
 from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml, \
     get_pod_resources
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
@@ -114,7 +110,7 @@ def generate_graph():
         {
             "metric_analyser": "metric_analyser",
             "diagnostic": "diagnostic",
-            "solution": "solution",
+            "__end__": "incident_reporter"
         },
     )
 
@@ -134,7 +130,7 @@ def export_graph_image(graph):
     image.show()
 
 
-async def run(manager, session: SessionDep, run_id: uuid.UUID):
+async def run(web_socket_manager, session: SessionDep, run_id: uuid.UUID):
     try:
         # Create the graph with full workflow
         graph = generate_graph()
@@ -167,7 +163,7 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
             json_event = event_to_json(event)
 
             inserted_event = create_event(session, run_id, json_event)
-            await manager.send_json(json_event)
+            await web_socket_manager.send_json(json_event)
 
         set_run_status(session, run_id, "finished")
 
@@ -184,7 +180,7 @@ async def run(manager, session: SessionDep, run_id: uuid.UUID):
         set_run_status(session, run_id, "failed")
 
         logging.error(f"Error: {e}")
-        await manager.send_json({"error": str(e)})
+        await web_socket_manager.send_json({"error": str(e)})
         raise e
     finally:
-        await manager.delete_current_run_json()
+        await web_socket_manager.delete_current_run_json()

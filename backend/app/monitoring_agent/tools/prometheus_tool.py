@@ -1,9 +1,7 @@
-import logging
 import os
 from dotenv import load_dotenv
 from langchain_core.tools import tool
 from prometheus_api_client import PrometheusConnect
-import re
 
 load_dotenv()
 
@@ -37,19 +35,11 @@ def execute_prometheus_query(query: str) -> str:
         if not prometheus.check_prometheus_connection():
             return "Prometheus is not available"
 
-        print("Initial query:", query)
-
         # Sanitize input to avoid injection
         sanitized_query = query.replace('\\"', '"')
 
-        print("Sanitized query:", sanitized_query)
-
         # Execute the query
         data = prometheus.custom_query(query=sanitized_query)
-        if not data:
-            return "No data found"
-
-        print("Raw data from Prometheus:", data)
 
         # Format the output
         result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
@@ -77,5 +67,5 @@ def get_http_request_per_seconds_by_job(job: str) -> str:
     '{job="sock-shop-user"}: 0.7'
     """
 
-    query = f'sum(rate(request_duration_seconds_count{{job="{job}"}}[1m])) by (job)'
+    query = f'sum(rate(request_duration_seconds_count{{job="{job}"}}[5m])) by (job)'
     return execute_prometheus_query(query)

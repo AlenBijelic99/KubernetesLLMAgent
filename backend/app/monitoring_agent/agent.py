@@ -9,7 +9,9 @@ from app.monitoring_agent.tools.tool_binder import extract_tool_metadata
 
 
 def create_agent(llm, tools, system_message: str):
-    """Create an agent."""
+    """
+    Create and agent with the given LLM and tools.
+    """
     system_message_text = (
         "You are a helpful AI assistant, collaborating with other assistants."
         " Use the provided tools to progress towards answering the question."
@@ -37,6 +39,10 @@ def create_agent(llm, tools, system_message: str):
     if tools:
         prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
 
+    # Bind the tools to the LLM
+    # Note: This is a temporary solution until we have a better way to handle tools with Ollama. To call tools with
+    # Ollama we have to user OllamaFunctions which is an experimental feature from LangChain. If no tools are needed for
+    # a task, better use Ollama directly.
     if tools:
         if isinstance(llm, ChatOpenAI):
             prompt_with_llm = prompt | llm.bind_tools(tools)

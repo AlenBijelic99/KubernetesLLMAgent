@@ -2,8 +2,6 @@ import functools
 import os
 
 from langchain_core.messages import AIMessage, ToolMessage
-from langchain_experimental.llms.ollama_functions import OllamaFunctions
-from langchain_openai import ChatOpenAI
 
 from app.monitoring_agent.agent import create_agent
 from app.monitoring_agent.llm import get_llm
@@ -16,11 +14,16 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def parse_config(config):
+    """
+    Helper function to parse the configuration for the system message.
+    """
     return f"role: {config['role']}, goal: {config['goal']}, backstory: {config['backstory']}, description: {config['description']}, expected_output: {config['expected_output']}, examples: {config['examples']}"
 
 
-# Helper function to create a node for a given agent
 def agent_node(state, agent, name):
+    """
+    Helper function to create a node for a given agent.
+    """
     result = agent.invoke(state)
     # We convert the agent output into a format that is suitable to append to the global state
     if isinstance(result, ToolMessage):
@@ -29,17 +32,18 @@ def agent_node(state, agent, name):
         result = AIMessage(**result.dict(exclude={"type", "name"}), name=name)
     return {
         "messages": [result],
-        # Since we have a strict workflow, we can
-        # track the sender so we know who to pass to next.
+        # Since we have a strict workflow, we can track the sender so we know who to pass to next.
         "sender": name,
     }
 
 
+# Define the tools available for each agent
 metric_analyser_tools = [get_pod_names, execute_prometheus_query, get_pod_resources, get_nodes_resources]
 diagnostic_tools = [execute_prometheus_query, get_pod_logs, get_pod_yaml, get_pod_resources]
 solution_tools = []
 incident_tools = []
 
+# Create an agent for each task
 metric_analyser_agent = create_agent(
     get_llm(metric_analyser_tools),
     metric_analyser_tools,

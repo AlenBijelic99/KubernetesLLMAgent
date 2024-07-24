@@ -38,7 +38,10 @@ def get_pod_names(namespace: str) -> list[Any] | str:
 
 @tool
 def get_pod_resources(pod: str, namespace: str) -> Dict[str, Any] | str:
-    """Get resources allocated to a specific pod in a namespace. Returns a dictionary with resource requests and limits."""
+    """
+     Get resources allocated to a specific pod in a namespace. Returns a dictionary with resource requests and
+    limits.
+    """
     v1 = k8s_config.get_client()
 
     try:
