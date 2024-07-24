@@ -31,6 +31,7 @@ If an error occurs during the execution of a step, the agent will stop the workf
 - [**LangGraph**](https://langchain-ai.github.io/langgraph/) and [**LangChain**](https://www.langchain.com/) for the AI agent.
 - [**Google Kubernetes Engine**](https://cloud.google.com/kubernetes-engine) for the Kubernetes cluster.
 - [**Prometheus**](https://prometheus.io/) for monitoring.
+- [**Google Cloud Logging**](https://cloud.google.com/logging) to access deployed application logs.
 
 ## Documentation
 
