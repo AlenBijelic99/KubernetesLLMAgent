@@ -40,22 +40,6 @@ If an error occurs during the execution of a step, the agent will stop the workf
 - User documentation can be found in the [User documentation](USER_README.md) file.
 - Administrator documentation can be found in the [Administrator documentation](ADMINISTRATOR_README.md) file.
 
-### Input Variables
-
-The input variables, with their default values are:
-
-- `project_name`: The name of the project, shown to API users
-- `stack_name`: he name of the stack used for Docker Compose labels and project name (no spaces, no periods)
-- `secret_key`: (default: `"changethis"`) The secret key for the project, used for security
-- `first_superuser`: (default: `"admin@example.com"`) The email of the first superuser
-- `first_superuser_password`: (default: `"changethis"`) The password of the first superuser
-- `smtp_host`: The SMTP server host to send emails
-- `smtp_user`: The SMTP server user to send emails
-- `smtp_password`: The SMTP server password to send emails
-- `emails_from_email`: The email account to send emails from
-- `postgres_password`: The password for the PostgreSQL database
-- `sentry_dsn`: The DSN for Sentry
-
 ## Backend Development
 
 Backend docs: [backend/README.md](./backend/README.md).
