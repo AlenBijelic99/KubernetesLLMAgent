@@ -63,12 +63,18 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+      - KUBECONFIG_FILE=/root/.kube/config
+      - GOOGLE_APPLICATION_CREDENTIALS_FILE=/root/.kube/${GOOGLE_APPLICATION_CREDENTIALS_FILE?Variable not set}
 
+    volumes:
+      - kube-config:/root/.kube
     build:
       context: ./backend
       args:
         INSTALL_DEV: ${INSTALL_DEV-false}
     platform: linux/amd64 # Patch for M1 Mac
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
@@ -76,13 +82,20 @@ services:
 
       - traefik.http.services.${STACK_NAME?Variable not set}-backend.loadbalancer.server.port=80
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`${DOMAIN?Variable not set}`, `www.${DOMAIN?Variable not set}`) && PathPrefix(`/api`, `/docs`, `/redoc`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.rule=Host(`${DOMAIN?Variable not set}`, `www.${DOMAIN?Variable not set}`) && PathPrefix(`/api`, `/docs`, `/redoc`, `/ws`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.entrypoints=http
 
-      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.rule=Host(`${DOMAIN?Variable not set}`, `www.${DOMAIN?Variable not set}`) && PathPrefix(`/api`, `/docs`, `/redoc`)
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.rule=Host(`${DOMAIN?Variable not set}`, `www.${DOMAIN?Variable not set}`) && PathPrefix(`/api`, `/docs`, `/redoc`, `/ws`)
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.entrypoints=https
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.tls=true
       - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.tls.certresolver=le
+
+      # Enable WebSocket for Traefik
+      - traefik.http.middlewares.${STACK_NAME?Variable not set}-websockets.headers.customrequestheaders.Upgrade=websocket
+      - traefik.http.middlewares.${STACK_NAME?Variable not set}-websockets.headers.customrequestheaders.Connection=Upgrade
+
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-http.middlewares=${STACK_NAME?Variable not set}-websockets
+      - traefik.http.routers.${STACK_NAME?Variable not set}-backend-https.middlewares=${STACK_NAME?Variable not set}-websockets
 
       # Define Traefik Middleware to handle domain with and without "www" to redirect to only one
       - traefik.http.middlewares.${STACK_NAME?Variable not set}-www-redirect.redirectregex.regex=^http(s)?://www.(${DOMAIN?Variable not set})/(.*)
@@ -124,6 +137,12 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect,${STACK_NAME?Variable not set}-www-redirect
 volumes:
   app-db-data:
+  kube-config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "C:/Users/Alen Bijelic/.kube"
 
 networks:
   traefik-public:

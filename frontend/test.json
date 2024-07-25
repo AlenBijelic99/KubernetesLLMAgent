@@ -1,0 +1,56 @@
+[
+  {
+    'name': 'execute_prometheus_query',
+    'description': 'Executes a custom Prometheus query with the prometheus_api_client and returns the result.\n\nParameters:\n- query (str): The PromQL query to execute without query\n\nReturns:\n- str: The result of the query in a readable format.\n\nExample usage:\n>>> execute_prometheus_query(\'sum(rate(container_cpu_usage_seconds_total{namespace="bookinfo", pod="details-v1-5997599bc6-vqzjq"}[5m])) by (pod)\')\n\'{pod="details-v1-5997599bc6-vqzjq"}: 0\'',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'tool_input': {
+          'type': 'string'
+        },
+        'callbacks': {
+          'type': 'string'
+        }
+      },
+      'required': [
+        'tool_input'
+      ]
+    }
+  },
+  {
+    'name': 'get_pod_logs',
+    'description': 'Get logs from a pod in a namespace. Returns logs of a pod in the specified namespace.\n\nParameters:\n- logs_filter (str): The logs filter in the format of a Google Cloud Logging filter.\n\nReturns:\n- str: The requested logs.\n\nNotes:\n- Always use timestamp>= and timestamp<= to filter logs by time and avoid fetching all unnecessary logs.\n\nExample usage:\n>>> get_pod_logs(\'resource.type="k8s_container" resource.labels.project_id="plenary-stacker-422509-j4" resource.labels.location="europe-west6-a" resource.labels.cluster_name="gke-monitoring-agent" resource.labels.namespace_name="boutique" labels.k8s-pod/app="adservice" severity>=DEFAULT timestamp>="2024-07-08T16:41:00Z" timestamp<="2024-07-08T16:42:00Z"\')',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'tool_input': {
+          'type': 'string'
+        },
+        'callbacks': {
+          'type': 'string'
+        }
+      },
+      'required': [
+        'tool_input'
+      ]
+    }
+  },
+  {
+    'name': 'get_pod_yaml',
+    'description': 'Get pod YAML configuration in a namespace. Returns the YAML configuration of a pod in the specified namespace.',
+    'parameters': {
+      'type': 'object',
+      'properties': {
+        'tool_input': {
+          'type': 'string'
+        },
+        'callbacks': {
+          'type': 'string'
+        }
+      },
+      'required': [
+        'tool_input'
+      ]
+    }
+  }
+]

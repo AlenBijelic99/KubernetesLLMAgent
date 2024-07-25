@@ -1,46 +1,71 @@
 import os
 from dotenv import load_dotenv
-from crewai_tools import tool
+from langchain_core.tools import tool
 from prometheus_api_client import PrometheusConnect
-import re
 
 load_dotenv()
 
 
-def is_valid_namespace(namespace: str) -> bool:
-    """Validate namespace to be alphanumeric and possibly include some allowed characters."""
-    pattern = re.compile(r'^[a-zA-Z0-9-_]+$')
-    return bool(pattern.match(namespace))
+@tool
+def execute_prometheus_query(query: str) -> str:
+    """
+    Executes a custom Prometheus query with the prometheus_api_client and returns the result.
 
+    Parameters:
+    - query (str): The PromQL query to execute without query
 
-@tool("Get summarized metrics of a namespace using Prometheus")
-def get_metrics_of_namespace(namespace: str) -> str:
-    """Returns summarized metrics of a namespace using Prometheus"""
+    Returns:
+    - str: The result of the query in a readable format.
 
-    prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+    Example usage:
+    Returns the CPU usage of a specific pod in the last 5 minutes:
+    >>> execute_prometheus_query('sum(rate(container_cpu_usage_seconds_total{namespace="bookinfo", pod="details-v1-5997599bc6-vqzjq"}[5m])) by (pod)')
+    '{pod="details-v1-5997599bc6-vqzjq"}: 0'
+    An example of a query that returns HTTP requests per second by job, which is the name of the app
+    >>> execute_prometheus_query('sum(rate(http_requests_total{namespace="testing-apps"}[5m])) by (job)')
+    '{job="metric-app"}: 0'
+    """
 
-    # Connect to Prometheus
-    prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
+    try:
+        prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
 
-    # Sanitize input to avoid injection
-    if not is_valid_namespace(namespace):
-        return "Invalid namespace. Only alphanumeric characters, dashes, and underscores are allowed."
+        # Connect to Prometheus
+        prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
 
-    # Construct the queries
-    queries = {
-        "cpu_usage": f'sum(rate(container_cpu_usage_seconds_total{{namespace="{namespace}"}}[5m])) by (namespace)',
-        "memory_usage": f'sum(container_memory_usage_bytes{{namespace="{namespace}"}}) by (namespace)'
-    }
+        if not prometheus.check_prometheus_connection():
+            return "Prometheus is not available"
 
-    results = {}
-    for metric, query in queries.items():
-        data = prometheus.custom_query(query=query)
-        if data:
-            results[metric] = data[0]['value'][1]  # Extract the value
-        else:
-            results[metric] = "No data"
+        # Sanitize input to avoid injection
+        sanitized_query = query.replace('\\"', '"')
 
-    # Format the output
-    result = "\n".join([f"{metric}: {value}" for metric, value in results.items()])
+        # Execute the query
+        data = prometheus.custom_query(query=sanitized_query)
 
-    return result
+        # Format the output
+        result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
+
+        return result
+    except Exception as e:
+        return f"Error executing Prometheus query: {e}"
+
+@tool
+def get_http_request_per_seconds_by_job(job: str) -> str:
+    """
+    Get the HTTP request per seconds for a specific job in the last minute.
+
+    Parameters:
+    - job (str): The job name to filter the request duration. It is made of {namespace}-{service name}.
+
+    Returns:
+    - str: The request duration for the specified job in the last minute.
+
+    Notes:
+    - Not all jobs may have HTTP requests, so the result may be 0 or No data found.
+
+    Example usage:
+    >>> get_http_request_per_seconds_by_job('sock-shop-user')
+    '{job="sock-shop-user"}: 0.7'
+    """
+
+    query = f'sum(rate(request_duration_seconds_count{{job="{job}"}}[5m])) by (job)'
+    return execute_prometheus_query(query)

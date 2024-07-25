@@ -1,7 +1,8 @@
 import { Button, Container, Text } from "@chakra-ui/react"
-import { Link } from "@tanstack/react-router"
+import {useNavigate} from "@tanstack/react-router"
 
 const NotFound = () => {
+  const navigate = useNavigate()
   return (
     <>
       <Container
@@ -24,8 +25,9 @@ const NotFound = () => {
         <Text fontSize="md">Oops!</Text>
         <Text fontSize="md">Page not found.</Text>
         <Button
-          as={Link}
-          to="/"
+          onClick={() => {
+            navigate({ to: "/", search: ""});
+          }}
           color="ui.main"
           borderColor="ui.main"
           variant="outline"
