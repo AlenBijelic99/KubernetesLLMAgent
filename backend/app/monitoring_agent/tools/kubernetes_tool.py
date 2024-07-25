@@ -120,9 +120,9 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
         # Convert list of entries to a single string
         entries_str = ''.join(map(str, formatted_entries))
 
-        # Get the last 5000 characters to avoid OpenAI token limit
-        if len(entries_str) > 5000:
-            entries_str = entries_str[-5000:]
+        # Get the last 10000 characters to avoid OpenAI token limit
+        if len(entries_str) > 10000:
+            entries_str = entries_str[-10000:]
 
         return entries_str
 
