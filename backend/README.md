@@ -186,7 +186,7 @@ The models are defined in the `backend/app/models.py` file. The models are defin
 
 The two tables that are created are the `AgentRun` and the `Event`. The `AgentRun` table is used to store the runs of the agent. The `AgentEvent` table is used to store the events of the agent.
 
-![Database schema for agent runs and events](../img/realisation_db.png)
+![Database schema for agent runs and events](realisation_db.png)
 
 The id of both tables are UUID fields. The `event_data` from the `Event` table is a JSON field which stores the event data in a JSON format. The `run_id` is a foreign key to the `AgentRun` table. The `status` field is an Enum field which can take the values `running`, `finished` or `failed`.
 

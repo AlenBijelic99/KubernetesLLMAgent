@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Kubernetes AI Agent - Technical documentation</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Kubernetes AI Agent - Technical documentation</h1>
+</header>
+<h1 id="kubernetes-ai-agent---backend">Kubernetes AI Agent - Backend</h1>
+<p>The Full Stack FastAPI frontend documentation can be found <a href="#fastapi-project---backend">down below</a></p>
+<h2 id="code-structure">Code Structure</h2>
+<p>The backend code is structured as follows:</p>
+<ul>
+<li><code>backend/app/alembic</code> - The directory with the Alembic migrations.</li>
+<li><code>backend/app/api</code> - The different API endpoints of the backend.</li>
+<li><code>backend/app/core</code> - The core functionality of the backend, such as the database connection and the security.</li>
+<li><code>backend/app/monitoring_agent</code> - The LLM agent using LangGraph.</li>
+<li><code>backend/app/tests</code> - The tests of the backend.</li>
+<li><code>backend/app/web</code> - The WebSocket connection to retrieve runs in real-time.</li>
+<li><code>backend/crud.py</code> - The CRUD (Create, Read, Update, Delete) utils.</li>
+<li><code>backend/main.py</code> - The FastAPI application creation and configuration.</li>
+</ul>
+<h2 id="monitoring-agent">Monitoring Agent</h2>
+<p>The monitoring agent code is in the <code>backend/app/monitoring_agent</code> directory. It is developed using the <a href="https://langchain-ai.github.io/langgraph/">LangGraph</a> library.</p>
+<h3 id="code-structure-1">Code Structure</h3>
+<p>The agent code is structured as follows:</p>
+<ul>
+<li><code>backend/app/monitoring_agent/agent.py</code> - The agent class.</li>
+<li><code>backend/app/monitoring_agent/agent_nodes.py</code> - The agent nodes.</li>
+<li><code>backend/app/monitoring_agent/edge.py</code> - The router for edges routing.</li>
+<li><code>backend/app/monitoring_agent/llm.py</code> - The LLM class to create the LLM client.</li>
+<li><code>backend/app/monitoring_agent/main.py</code> - The main file to run the agent workflow.</li>
+<li><code>backend/app/monitoring_agent/prompts.py</code> - The prompts for the agent.</li>
+<li><code>backend/app/monitoring_agent/state.py</code> - The state class.</li>
+</ul>
+<h3 id="state">State</h3>
+<p>A AgentState is a class that inherits from <code>TypedDict</code> which allows defining dictionary types with specific keys and values. It contains a list of messages and a sender. This state will then be passed through the workflow of the agent. Each agent will then add messages to the state and pass it to the next agent.</p>
+<p>The <code>operator.add</code> method is used to add messages to the state. This method is called by the framework to add a message in the list.</p>
+<p>The <code>sender</code> attribute is used to store the sender of the message. This is useful to know to which node respond to when a tool call is made so the response can be sent to the correct node.</p>
+<p>Here is an example of a state :</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>{<span class="st">&#39;metric_analyser&#39;</span>:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    {<span class="st">&#39;messages&#39;</span>: [</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        AIMessage(<span class="bu">id</span><span class="op">=</span><span class="st">&#39;run-34618012-fba9-4380-a745-346b4a2ac44e-0&#39;</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                  name<span class="op">=</span><span class="st">&#39;metric_analyser&#39;</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>                  content<span class="op">=</span><span class="st">&#39;&#39;</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                  tool_calls<span class="op">=</span>[{<span class="st">&#39;name&#39;</span>: <span class="st">&#39;get_pod_names&#39;</span>, <span class="st">&#39;args&#39;</span>: {<span class="st">&#39;namespace&#39;</span>: <span class="st">&#39;testing-apps&#39;</span>}, <span class="st">&#39;id&#39;</span>: <span class="st">&#39;call_Y8mXlniyV8sdV28AHnk55mjI&#39;</span>}],</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                  additional_kwargs<span class="op">=</span>{<span class="st">&#39;tool_calls&#39;</span>: [</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                      {<span class="st">&#39;id&#39;</span>: <span class="st">&#39;call_Y8mXlniyV8sdV28AHnk55mjI&#39;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                       <span class="st">&#39;function&#39;</span>: {<span class="st">&#39;arguments&#39;</span>: <span class="st">&#39;{&quot;namespace&quot;: &quot;testing-apps&quot;}&#39;</span>, <span class="st">&#39;name&#39;</span>: <span class="st">&#39;get_pod_names&#39;</span>},</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                       <span class="st">&#39;type&#39;</span>: <span class="st">&#39;function&#39;</span>}</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                  ]},</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                  response_metadata<span class="op">=</span>{</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&#39;token_usage&#39;</span>: {<span class="st">&#39;completion_tokens&#39;</span>: <span class="dv">34</span>, <span class="st">&#39;prompt_tokens&#39;</span>: <span class="dv">1005</span>, <span class="st">&#39;total_tokens&#39;</span>: <span class="dv">1039</span>},</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&#39;model_name&#39;</span>: <span class="st">&#39;gpt-4o-2024-05-13&#39;</span>, <span class="st">&#39;system_fingerprint&#39;</span>: <span class="st">&#39;fp_400f27fa1f&#39;</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>                      <span class="st">&#39;finish_reason&#39;</span>: <span class="st">&#39;tool_calls&#39;</span>, <span class="st">&#39;logprobs&#39;</span>: <span class="va">None</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>                      },</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                  usage_metadata<span class="op">=</span>{<span class="st">&#39;input_tokens&#39;</span>: <span class="dv">1005</span>, <span class="st">&#39;output_tokens&#39;</span>: <span class="dv">34</span>, <span class="st">&#39;total_tokens&#39;</span>: <span class="dv">1039</span>})],</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;sender&#39;</span>: <span class="st">&#39;metric_analyser&#39;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h3 id="nodes">Nodes</h3>
+<p>Nodes are created in the <code>backend/app/monitoring_agent/agent_nodes.py</code> file.</p>
+<p>The <code>parse_config</code> method is used to parse the prompts to a single string. The promps are defined in the <code>prompts.py</code> file and are a dictionary with the name of the prompt as the key and the prompt is defined with a role, a goal, a backstory, a description, an expected_output and a list of examples.</p>
+<p>The <code>agent_node</code> method is used to create a node. It takes a state, an agent and a name. This method will be called by the framework to execute the given task to the agent. Agents are created with the <code>functools.partial</code> which partially creates the object. Firstly nodes are created with the <code>agent_node</code> method and only agent and name are passed. The state is passed when the node is executed. This mechanism is needed as we need to compile the graph to validate the nodes and the edges but the state is not available at this time.</p>
+<p>The agent objects needed to the previous function are made with the <code>create_agent</code> method. It takes an LLM object (which currently is either ChatOpenaiAI, OllamaFunctions or Ollama), a list of available tools and the system_message. This method defines the main prompt explaining the overall goal of the agent, the available tools and the system_message which is the task to be executed by the agent.</p>
+<h3 id="edges">Edges</h3>
+<p>The agent only uses conditional edges wich enables the agent to choose the next node to execute based on the response of the previous node. The router is defined in the <code>backend/app/monitoring_agent/edge.py</code> file. It takes the state, select the last message and firstly checks for the <code>tool_calls</code> attribute. If it is present, the router will return the node with the name of the tool call. Otherwise, it will continue to check for keywords such as “DIAGNOSTIC NEEDED” or “GENERATE SOLUTIONS” and return the keyword “continue”. If keywords “UNSUCCESSFUL” or “FINISHED” are present, the router will return the keyword <code>__end__</code>. There only keywords are used. The next node is then defined during the graph generation.</p>
+<h3 id="flow">Flow</h3>
+<p>In the <code>generate_graph</code> method in the <code>main.py</code> file, We define the workflow using the <code>StateGraph</code> with the <code>AgentState</code> in parameter.</p>
+<p>In this worflow each node created with the <code>agent_node</code> method is added to the graph using the <code>add_node</code> method. It takes in parameter a string for the name of the node and the agent object. The tool_node is created using the <code>ToolNode</code> method and taking a list of tools in parameters.</p>
+<p>Then the edges are added to the graph using the <code>add_conditional_edges</code> method. It takes in parameters the name of the node, the router function, and a mapping dictionnary with the next node to execute based on the router output.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>workflow.add_conditional_edges(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;metric_analyser&quot;</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        router,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        {<span class="st">&quot;continue&quot;</span>: <span class="st">&quot;diagnostic&quot;</span>, <span class="st">&quot;call_tool&quot;</span>: <span class="st">&quot;call_tool&quot;</span>, <span class="st">&quot;__end__&quot;</span>: <span class="st">&quot;incident_reporter&quot;</span>},</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<p>For the <code>call_tool</code> node, to define the next node to execute, the function retrieves the sender name of the current state. The path map is defined in the <code>path_map</code> dictionnary. The next node to execute is then defined based on the sender name to return the tool response to the correct node.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>workflow.add_conditional_edges(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;call_tool&quot;</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> x: x[<span class="st">&quot;sender&quot;</span>],</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;metric_analyser&quot;</span>: <span class="st">&quot;metric_analyser&quot;</span>,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;diagnostic&quot;</span>: <span class="st">&quot;diagnostic&quot;</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;__end__&quot;</span>: <span class="st">&quot;incident_reporter&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<p>As all nodes and edges are defined, one last edge needs to be defined to indicate the end of the workflow. This is done with the <code>add_edge</code> which creates a normal edge between <code>incident_reporter</code> and the <code>END</code> node which is a node provided by the framework.</p>
+<p>With the <code>set_entry_point</code> method, the entry point of the workflow is defined. The entry point is the first node to be executed. In this case, it is the <code>metric_analyser</code> node.</p>
+<p>Finally, the workflow is compiled to check if all nodes and edges are correctly defined.</p>
+<h3 id="run">Run</h3>
+<p>To run the agent, the <code>run</code> method is called. It takes a WebSocket manager to send json to users, a session to save the events in the database and a run id.</p>
+<p>The <code>run</code> method initialise the graph, defined the namespaces to monitor and the input message.</p>
+<p>Then the graph can be executed using the graph.astream method which will stream all events that occurses during the execution of the graph. The <code>stream_mode</code> is defined to <code>Updates</code> which will return an event as soon as it is generated. Another option is to use <code>Values</code> which will return the final state of the graph.</p>
+<p>Each event generated by the graph is then parsed to json and sent to the user using the WebSocket manager as well as saved in the database. When the workflow is finished, the status of the run is modified to <code>finished</code>. If any exception occurs during the execution of the graph, the status is modified to <code>failed</code> and the exception is saved in the database.</p>
+<p>Setting the run status and creating an event is made using the <code>set_run_status</code> and <code>create_event</code> methods defined in the <code>crud.py</code> file. These methods are used to interact with the database using the session in the parameters which allows to save the events and the run status in the database.</p>
+<h3 id="tools">Tools</h3>
+<p>The tools are defined in the <code>backend/app/monitoring_agent/tools</code> directory.</p>
+<p>The tools for Kubernetes are defined in the <code>kubernetes_tool.py</code> file.</p>
+<p>To access the Kubernetes cluster, the KubernetesConfig class has been created in the <code>backend/app/monitoring-agent/config/k8s_config.py</code> file. This class is used to create a Kubernetes client using the <code>kubernetes</code> library. The <code>authenticate</code>method is used to read the service account file and create a client. The <code>get_client</code> method is used to authenticate the client if it is not already done and return the client. For a better security the authentication should use the SSL certificate.</p>
+<p>Another similar class has been created to access Googl Cloud Logs. The <code>GoogleCloudLogging</code> class uses the <code>google-cloud-logging</code> library to create a client. The <code>get_client</code> method is used to authenticate the client if it is not already done and return the client. The authentication is using the service account file.</p>
+<p>The tools created for Kubernetes are * <code>list_namespaced_pod</code> : List all pods in a namespace. * <code>get_pod_resources</code> : Get the resources of a pod. * <code>get_nodes_resources</code> : Get the resources of all nodes. * <code>get_pod_logs</code> : Get the logs of a pod. * <code>get_pod_yaml</code> : Get the yaml of a pod.</p>
+<p>When creating a tool that can be used with the LLM agent, the functions should be annotated with the <code>@tool</code> decorator and containing a description of the tool in the comments. The framework will use the name, the paramteres, the return type and the description of the tool to parse it in json and send it to the LLM.</p>
+<p>The <code>get_pod_logs</code> tool is a little bit different. All other tools take a defined number of parameters with specific types. This function takes a logs filter which is of string type. But the format of the string is very specific as it should match the Google Cloud Logging filter format.</p>
+<p>Here is an example of Google Cloud Logging filter format :</p>
+<pre><code>resource.type=&quot;k8s_container&quot;
+resource.labels.project_id=&quot;plenary-stacker-422509-j4&quot;
+resource.labels.location=&quot;europe-west6-a&quot;
+resource.labels.cluster_name=&quot;gke-monitoring-agent&quot;
+resource.labels.namespace_name=&quot;boutique&quot;
+labels.k8s-pod/app=&quot;adservice&quot;
+severity&gt;=DEFAULT
+timestamp&gt;=&quot;2024-07-08T16:41:00Z&quot;
+timestamp&lt;=&quot;2024-07-08T16:42:00Z&quot;</code></pre>
+<p>For Prometheus tools, the <code>prometheus_tool.py</code> file has been created.</p>
+<p>The <code>execute_prometheus_query</code> tool is also special. The string query passed in parameter should follow the PromQL format. The function will then execute the query and return the result in a json format. This is interesting as the LLM will generate the query and the agent will execute it. The Prometheus queries are executed with the PrometheusQuery client. During many tests, there was a need to sanitize the query to avoid issues with the Prometheus API. The sanitization simply removes double backslashes which are not needed in the query.</p>
+<p>Another tool was created only for the use to get HTTP metrics for the <code>sock-shop</code> test app. The query is hardcoded using the name <code>request_duration_seconds_count</code> which is the metric used to get the number of requests. This tool was created when <code>execute_prometheus_query</code> was not able to use this metric as its name is dedicated to the <code>sock-shop</code> app.</p>
+<h3 id="llm">LLM</h3>
+<p>In the <code>llm.py</code> file the functions <code>get_llm</code> retrieves the environment variable <code>LLM_MODEL</code> and creates a client using the <code>ChatOpenaiAI</code> class if the LLM starts with <code>gpt</code> for <code>gpt-4o</code> and <code>gpt-3.5-turbo</code> models. Otherwise, if the model is Llama3, we create an <code>OllamaFunctions</code> if tools are available or an <code>Ollama</code> client if no tools are available. Currently, using Ollama LLM is not working as wanted which may be caused by the <code>OllamaFunctions</code> which is still an experimental feature.</p>
+<p>When developing the agent, the <code>OllamaFunctions</code> has an issue parsing the tools which forced to create a parsing method for tools. This method is defined in the <code>tool_binder.py</code> file. It takes a function in the parameter and returns the name of the function, the parameters and the description of the function.</p>
+<h2 id="db">DB</h2>
+<h3 id="models">Models</h3>
+<p>The models are defined in the <code>backend/app/models.py</code> file. The models are defined using the SQLModel library which is a library to define SQL tables using Python classes.</p>
+<p>The two tables that are created are the <code>AgentRun</code> and the <code>Event</code>. The <code>AgentRun</code> table is used to store the runs of the agent. The <code>AgentEvent</code> table is used to store the events of the agent.</p>
+<figure>
+<img src="realisation_db.png" alt="Database schema for agent runs and events" /><figcaption aria-hidden="true">Database schema for agent runs and events</figcaption>
+</figure>
+<p>The id of both tables are UUID fields. The <code>event_data</code> from the <code>Event</code> table is a JSON field which stores the event data in a JSON format. The <code>run_id</code> is a foreign key to the <code>AgentRun</code> table. The <code>status</code> field is an Enum field which can take the values <code>running</code>, <code>finished</code> or <code>failed</code>.</p>
+<p>Here is the example of the event in JSON format detailed in the <a href="#state">State section</a> :</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;metric_analyser&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;messages&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;run-50a3a733-d765-4d5a-9e35-0fa9d83ea82e-0&quot;</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;metric_analyser&quot;</span><span class="fu">,</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;ai&quot;</span><span class="fu">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;&quot;</span><span class="fu">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;tool_calls&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>          <span class="fu">{</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="st">&quot;get_pod_names&quot;</span><span class="fu">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;args&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>              <span class="dt">&quot;namespace&quot;</span><span class="fu">:</span> <span class="st">&quot;boutique&quot;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            <span class="fu">},</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;call_JJ4WETCdsEMXMKPmmFVqaD90&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>          <span class="fu">}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="er">...</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;sender&quot;</span><span class="fu">:</span> <span class="st">&quot;metric_analyser&quot;</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Other models where created to match the data of the agent that need to be send to the frontend. The <code>AgentRunAndEventsPublic</code> model is used to store the data of a run and its events. The <code>AgentRunPublic</code> model represents a single run without its events. The <code>AgentRunsPublic</code> model is used to store a list of runs without their events.</p>
+<h3 id="crud">CRUD</h3>
+<p>The CRUD operations are defined in the <code>backend/app/crud.py</code> file. The <code>create_run</code> method is used to create a run. It is used when the user asks for an agent run. The <code>create_event</code> method is used to create an event. It is used to save in the database all events produces by the workflow and different tasks. The <code>get_run_events</code> method is used to get all events of a run. It is used to return to the frontend all events of a run. The <code>set_run_status</code> method is used to set the status of a run. It it used when the run is finished or failed.</p>
+<h2 id="api">API</h2>
+<p>The API is built with <a href="https://fastapi.tiangolo.com/">FastAPI</a>. In <code>backend/app/api</code> you can find the different endpoints of the API. Routes concerning the agent are in the <code>agent.py</code> file. There are 3 routes in this file:</p>
+<ul>
+<li><code>POST /agent/run</code> - To run the agent.</li>
+<li><code>GET /agent/runs</code> - To get the list of runs.</li>
+<li><code>GET /agent/run/{run_id}</code> - To get the details of a run.</li>
+</ul>
+<p>The route for websocket is in the <code>main.py</code> file. The route is <code>/ws</code> and is used to connect to the websocket to get the events in real-time. It was placed in this file as it would not be possible to connect to the websocket if it was in the <code>agent.py</code> file.</p>
+<p>All these routes are only available if the user is authenticated. The verification is made by passing the <code>CurrentUser</code> object to the route. This object is created by the <code>get_current_user</code> method in the <code>backend/app/api/deps.py</code> file. This method uses the <code>OAuth2PasswordBearer</code> to get the token from the request and then the <code>jwt.decode</code> method to decode the token and get the user information.</p>
+<p>All available routes are documented using <a href="https://swagger.io/tools/swagger-ui/">Swagger UI</a>. You can access the documentation at <code>http://localhost:8080/docs</code>.</p>
+<h1 id="fastapi-project---backend">FastAPI Project - Backend</h1>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><a href="https://www.docker.com/">Docker</a>.</li>
+<li><a href="https://python-poetry.org/">Poetry</a> for Python package and environment management.</li>
+</ul>
+<h2 id="local-development">Local Development</h2>
+<ul>
+<li>Start the stack with Docker Compose:</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code></pre></div>
+<ul>
+<li>Now you can open your browser and interact with these URLs:</li>
+</ul>
+<p>Frontend, built with Docker, with routes handled based on the path: http://localhost</p>
+<p>Backend, JSON based web API based on OpenAPI: http://localhost/api/</p>
+<p>Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost/docs</p>
+<p>Adminer, database web administration: http://localhost:8080</p>
+<p>Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090</p>
+<p><strong>Note</strong>: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.</p>
+<p>To check the logs, run:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose logs</span></code></pre></div>
+<p>To check the logs of a specific service, add the name of the service, e.g.:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose logs backend</span></code></pre></div>
+<p>If your Docker is not running in <code>localhost</code> (the URLs above wouldn’t work) you would need to use the IP or domain where your Docker is running.</p>
+<h2 id="backend-local-development-additional-details">Backend local development, additional details</h2>
+<h3 id="general-workflow">General workflow</h3>
+<p>By default, the dependencies are managed with <a href="https://python-poetry.org/">Poetry</a>, go there and install it.</p>
+<p>From <code>./backend/</code> you can install all the dependencies with:</p>
+<pre class="console"><code>$ poetry install</code></pre>
+<p>Then you can start a shell session with the new environment with:</p>
+<pre class="console"><code>$ poetry shell</code></pre>
+<p>Make sure your editor is using the correct Python virtual environment.</p>
+<p>Modify or add SQLModel models for data and SQL tables in <code>./backend/app/models.py</code>, API endpoints in <code>./backend/app/api/</code>, CRUD (Create, Read, Update, Delete) utils in <code>./backend/app/crud.py</code>.</p>
+<h3 id="enabling-open-user-registration">Enabling Open User Registration</h3>
+<p>By default the backend has user registration disabled, but there’s already a route to register users. If you want to allow users to register themselves, you can set the environment variable <code>USERS_OPEN_REGISTRATION</code> to <code>True</code> in the <code>.env</code> file.</p>
+<p>After modifying the environment variables, restart the Docker containers to apply the changes. You can do this by running:</p>
+<pre class="console"><code>$ docker compose up -d</code></pre>
+<h3 id="vs-code">VS Code</h3>
+<p>There are already configurations in place to run the backend through the VS Code debugger, so that you can use breakpoints, pause and explore variables, etc.</p>
+<p>The setup is also already configured so you can run the tests through the VS Code Python tests tab.</p>
+<h3 id="docker-compose-override">Docker Compose Override</h3>
+<p>During development, you can change Docker Compose settings that will only affect the local development environment in the file <code>docker-compose.override.yml</code>.</p>
+<p>The changes to that file only affect the local development environment, not the production environment. So, you can add “temporary” changes that help the development workflow.</p>
+<p>For example, the directory with the backend code is mounted as a Docker “host volume”, mapping the code you change live to the directory inside the container. That allows you to test your changes right away, without having to build the Docker image again. It should only be done during development, for production, you should build the Docker image with a recent version of the backend code. But during development, it allows you to iterate very fast.</p>
+<p>There is also a command override that runs <code>/start-reload.sh</code> (included in the base image) instead of the default <code>/start.sh</code> (also included in the base image). It starts a single server process (instead of multiple, as would be for production) and reloads the process whenever the code changes. Have in mind that if you have a syntax error and save the Python file, it will break and exit, and the container will stop. After that, you can restart the container by fixing the error and running again:</p>
+<pre class="console"><code>$ docker compose up -d</code></pre>
+<p>There is also a commented out <code>command</code> override, you can uncomment it and comment the default one. It makes the backend container run a process that does “nothing”, but keeps the container alive. That allows you to get inside your running container and execute commands inside, for example a Python interpreter to test installed dependencies, or start the development server that reloads when it detects changes.</p>
+<p>To get inside the container with a <code>bash</code> session you can start the stack with:</p>
+<pre class="console"><code>$ docker compose up -d</code></pre>
+<p>and then <code>exec</code> inside the running container:</p>
+<pre class="console"><code>$ docker compose exec backend bash</code></pre>
+<p>You should see an output like:</p>
+<pre class="console"><code>root@7f2607af31c3:/app#</code></pre>
+<p>that means that you are in a <code>bash</code> session inside your container, as a <code>root</code> user, under the <code>/app</code> directory, this directory has another directory called “app” inside, that’s where your code lives inside the container: <code>/app/app</code>.</p>
+<p>There you can use the script <code>/start-reload.sh</code> to run the debug live reloading server. You can run that script from inside the container with:</p>
+<pre class="console"><code>$ bash /start-reload.sh</code></pre>
+<p>…it will look like:</p>
+<pre class="console"><code>root@7f2607af31c3:/app# bash /start-reload.sh</code></pre>
+<p>and then hit enter. That runs the live reloading server that auto reloads when it detects code changes.</p>
+<p>Nevertheless, if it doesn’t detect a change but a syntax error, it will just stop with an error. But as the container is still alive and you are in a Bash session, you can quickly restart it after fixing the error, running the same command (“up arrow” and “Enter”).</p>
+<p>…this previous detail is what makes it useful to have the container alive doing nothing and then, in a Bash session, make it run the live reload server.</p>
+<h3 id="backend-tests">Backend tests</h3>
+<p>To test the backend run:</p>
+<pre class="console"><code>$ bash ./scripts/test.sh</code></pre>
+<p>The tests run with Pytest, modify and add tests to <code>./backend/app/tests/</code>.</p>
+<p>If you use GitHub Actions the tests will run automatically.</p>
+<h4 id="test-running-stack">Test running stack</h4>
+<p>If your stack is already up and you just want to run the tests, you can use:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose exec backend bash /app/tests-start.sh</span></code></pre></div>
+<p>That <code>/app/tests-start.sh</code> script just calls <code>pytest</code> after making sure that the rest of the stack is running. If you need to pass extra arguments to <code>pytest</code>, you can pass them to that command and they will be forwarded.</p>
+<p>For example, to stop on first error:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose exec backend bash /app/tests-start.sh <span class="at">-x</span></span></code></pre></div>
+<h4 id="test-coverage">Test Coverage</h4>
+<p>When the tests are run, a file <code>htmlcov/index.html</code> is generated, you can open it in your browser to see the coverage of the tests.</p>
+<h3 id="migrations">Migrations</h3>
+<p>As during local development your app directory is mounted as a volume inside the container, you can also run the migrations with <code>alembic</code> commands inside the container and the migration code will be in your app directory (instead of being only inside the container). So you can add it to your git repository.</p>
+<p>Make sure you create a “revision” of your models and that you “upgrade” your database with that revision every time you change them. As this is what will update the tables in your database. Otherwise, your application will have errors.</p>
+<ul>
+<li>Start an interactive session in the backend container:</li>
+</ul>
+<pre class="console"><code>$ docker compose exec backend bash</code></pre>
+<ul>
+<li><p>Alembic is already configured to import your SQLModel models from <code>./backend/app/models.py</code>.</p></li>
+<li><p>After changing a model (for example, adding a column), inside the container, create a revision, e.g.:</p></li>
+</ul>
+<pre class="console"><code>$ alembic revision --autogenerate -m &quot;Add column last_name to User model&quot;</code></pre>
+<ul>
+<li><p>Commit to the git repository the files generated in the alembic directory.</p></li>
+<li><p>After creating the revision, run the migration in the database (this is what will actually change the database):</p></li>
+</ul>
+<pre class="console"><code>$ alembic upgrade head</code></pre>
+<p>If you don’t want to use migrations at all, uncomment the lines in the file at <code>./backend/app/core/db.py</code> that end in:</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>SQLModel.metadata.create_all(engine)</span></code></pre></div>
+<p>and comment the line in the file <code>prestart.sh</code> that contains:</p>
+<pre class="console"><code>$ alembic upgrade head</code></pre>
+<p>If you don’t want to start with the default models and want to remove them / modify them, from the beginning, without having any previous revision, you can remove the revision files (<code>.py</code> Python files) under <code>./backend/app/alembic/versions/</code>. And then create a first migration as described above.</p>
+</body>
+</html>

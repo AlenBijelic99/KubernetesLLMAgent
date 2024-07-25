@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="kubernetes-ai-agent">Kubernetes AI Agent</h1>
+<p>A large language model agent designed to monitor and resolve issues within a Kubernetes cluster efficiently. This agent assists system administrators by identifying the root cause of problems, allowing them to focus on more critical and engaging tasks. The agent not only provides solutions to the issues but also documents each step taken in an incident report, ensuring thorough problem resolution and traceability.</p>
+<p>This project is the result of the Bachelor’s final project by Alen Bijelic during his final year at the School of Engineering and Management, Haute Ecole d’Ingénierie et de Gestion du Canton de Vaud (HEIG-VD). The project was supervised by Prof. Marcel Graf.</p>
+<h2 id="monitoring">Monitoring</h2>
+<p>The frontend provides a list of all agent runs, and each run can be viewed in detail.</p>
+<figure>
+<img src="img/realisation_frontend_index.svg" alt="List LLM agent runs" /><figcaption aria-hidden="true">List LLM agent runs</figcaption>
+</figure>
+<p>The agent uses provided tools to retrieve information about the Kubernetes cluster and its resources. Here is an example of a run where the agent executes the <code>get_pod_names</code> to get pod names of a namespace.</p>
+<figure>
+<img src="img/realisation_frontend_run.svg" alt="Details of a LLM agent run" /><figcaption aria-hidden="true">Details of a LLM agent run</figcaption>
+</figure>
+<figure>
+<img src="img/run-details.png" alt="Details of a LLM agent run" /><figcaption aria-hidden="true">Details of a LLM agent run</figcaption>
+</figure>
+<h2 id="agent-workflow">Agent workflow</h2>
+<p>The generated workflow can be seen in the following image.</p>
+<p>The nodes represent the different steps the agent takes to resolve an issue, and the edges represent the dependencies between the steps. Some of the nodes are connected with the <code>call_tool</code> node, which represents the execution of a tool.</p>
+<p>If an error occurs during the execution of a step, the agent will stop the workflow and create an incident report. The incident report will contain the error message and the steps taken up to that point.</p>
+<figure>
+<img src="img/realisation_langgraphworkflow.png" alt="Graph flow" /><figcaption aria-hidden="true">Graph flow</figcaption>
+</figure>
+<h2 id="technology-stack">Technology Stack</h2>
+<ul>
+<li><a href="https://github.com/tiangolo/full-stack-fastapi-template"><strong>Full Stack FastAPI Template</strong></a> for the backend, frontend and DB.</li>
+<li><a href="https://langchain-ai.github.io/langgraph/"><strong>LangGraph</strong></a> and <a href="https://www.langchain.com/"><strong>LangChain</strong></a> for the AI agent.</li>
+<li><a href="https://cloud.google.com/kubernetes-engine"><strong>Google Kubernetes Engine</strong></a> for the Kubernetes cluster.</li>
+<li><a href="https://prometheus.io/"><strong>Prometheus</strong></a> for monitoring.</li>
+<li><a href="https://cloud.google.com/logging"><strong>Google Cloud Logging</strong></a> to access deployed application logs.</li>
+</ul>
+<h2 id="documentation">Documentation</h2>
+<ul>
+<li>Technical documentation contains a part for the monitoring agent and a part of the Full Stack FastAPI documentation. They can be found in each of the following directories:
+<ul>
+<li><a href="backend/README.md">Backend</a> : contains the documentation for the backend part of the project including the monitoring agent.</li>
+<li><a href="frontend/README.md">Frontend</a> : contains the documentation for the frontend part of the project.</li>
+</ul></li>
+<li>User documentation can be found in the <a href="USER_README.md">User documentation</a> file.</li>
+<li>Administrator documentation can be found in the <a href="ADMINISTRATOR_README.md">Administrator documentation</a> file.</li>
+</ul>
+<h2 id="backend-development">Backend Development</h2>
+<p>Backend docs: <a href="./backend/README.md">backend/README.md</a>.</p>
+<h2 id="frontend-development">Frontend Development</h2>
+<p>Frontend docs: <a href="./frontend/README.md">frontend/README.md</a>.</p>
+<h2 id="deployment">Deployment</h2>
+<p>Deployment docs: <a href="./deployment.md">deployment.md</a>.</p>
+<h2 id="development">Development</h2>
+<p>General development docs: <a href="./development.md">development.md</a>.</p>
+<p>This includes using Docker Compose, custom local domains, <code>.env</code> configurations, etc.</p>
+<h2 id="full-stack-fastapi">Full stack FastAPI</h2>
+<p>For more information about the full stack FastAPI template project, go to <a href="https://github.com/tiangolo/full-stack-fastapi-template">Full Stack FastAPI Template</a>.</p>
+<h2 id="license">License</h2>
+<p>The Kubernetes AI Agent is licensed under the terms of the MIT license.</p>
+</body>
+</html>

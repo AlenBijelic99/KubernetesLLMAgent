@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Kubernetes AI Agent - Technical documentation</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Kubernetes AI Agent - Technical documentation</h1>
+</header>
+<h1 id="kubernetes-ai-agent---frontend">Kubernetes AI Agent - Frontend</h1>
+<p>The Full Stack FastAPI frontend documentation can be found <a href="#fastapi-project---frontend">down below</a></p>
+<h2 id="code-structure">Code Structure</h2>
+<p>The frontend code is structured as follows:</p>
+<ul>
+<li><code>frontend/.env</code> - The environment variables for the frontend.</li>
+<li><code>frontend/src</code> - The main frontend code.</li>
+<li><code>frontend/src/client</code> - The generated OpenAPI client.</li>
+<li><code>frontend/src/components</code> - The different components of the frontend.</li>
+<li><code>frontend/src/hooks</code> - Custom hooks.</li>
+<li><code>frontend/src/routes</code> - The different routes of the frontend which include the pages.</li>
+<li><code>theme.tsx</code> - The Chakra UI custom theme.</li>
+</ul>
+<h2 id="ui">UI</h2>
+<p>The user interface is built with <a href="https://chakra-ui.com/">Chakra UI</a>. It is a simple and easy to use component library that provides a lot of components to build a modern and responsive UI.</p>
+<p>The UI contains, in the main page a button to run the agent and a list of previous runs. When clicking on a run, a drawer will open with the details of the run.</p>
+<figure>
+<img src="../img/index-page.png" alt="Agent Page" /><figcaption aria-hidden="true">Agent Page</figcaption>
+</figure>
+<p>The drawer contains a stepper with the different steps of the run. Each step contains the messages sent by the LLM and the tool calls made by the LLM. The messages are grouped by sender and displayed in the same step of the stepper. The buttons enables us to open and close all the steps of the stepper.</p>
+<figure>
+<img src="../img/run.png" alt="Run details" /><figcaption aria-hidden="true">Run details</figcaption>
+</figure>
+<h2 id="websocket">WebSocket</h2>
+<p>A WebSocket connection is made to retrieve runs that are being executed in real-time.</p>
+<p>The WebSocket connection is handled by the <code>WebsocketService</code> which contains the method <code>getWebSocket()</code>. This method returns a WebSocket instance that can be used to send and receive messages. It use the address specified in the <code>.env</code>file. The WebSocket connection is created when the index page is loaded using a <code>useEffect</code> hook.</p>
+<p>The WebSocket instance is then managed in the <code>index.tsx</code> file using a ref. This allows to keep the connection open during the whole lifecycle of the application.</p>
+<p>When a message is received from the WebSocket, it is parsed and added to the last run, only if the run is opened. If the user opens the run during its execution, the messages will first be loaded from the database, then the new messages will be displayed in real-time.</p>
+<p>If an issue occurs with the WebSocket connection, an error message will be displayed to the user using toasts.</p>
+<h2 id="routes">Routes</h2>
+<p>The agent page is defined on the index page <code>frontend/src/routes/_layout/index.tsx</code>. It will display a button to run the agent and a list of previous runs. When clicking on an item of the list, it sets a query parameter <code>run</code> with the run id. This will open a <a href="https://v2.chakra-ui.com/docs/components/drawer">Drawer</a> with the details of the run.</p>
+<p>All requests are made through the Agent Service in the <code>frontend/src/client/servoces.ts</code> file. This service contains all the methods to interact with the backend API. The method <code>runAgent</code> is used to run the agent, <code>getAgentRuns</code> is used to get the list of runs and <code>getAgentRunById</code> is used to get the details of a run.</p>
+<h3 id="models">Models</h3>
+<p>Runs and events are defined in the <code>frontend/src/client/models.ts</code> file.</p>
+<p>The interface <code>ToolCall</code> defines the structure of a tool call the LLM did. It contains the id, the functions used with its name and arguments and the type of the tool.</p>
+<p>The interface <code>LLMMessage</code> defines the structure of a message sent by the LLM. It mocky the structure of the messages given by the LangChain abstract classes. It contains the id, the type of the message (AIMessage, HumanMessage or ToolMessage), the content and a list of tool calls.</p>
+<p>The interface <code>EventData</code> defines the structure of an event. An event is a list of LLMMessage and a sender. The sender is one of the nodes of the LangGraph flow. It is used to group messages by sender and display them in the same step of the stepper.</p>
+<p>The interface <code>Event</code> defines the structure of an event displayed in the drawer. It contains the id, the sender, the list of EventData and the date of the event.</p>
+<p>The interface <code>AgentRunPublic</code> defines the structure of a run displayed in the list. It contains the id, the status, the start date and the status of the run. The interface <code>AgentRunAndEventsPublic</code> defines the structure of a run displayed in the drawer. It contains the id, the status, the start date, the status of the run and the list of events.</p>
+<p>The interface <code>AgentRunsPublic</code> defines the complete list to display in the agent page. It contains the list of runs and a count of the total number of runs.</p>
+<figure>
+<img src="../img/frontend_agent_models.png" alt="UML of models" /><figcaption aria-hidden="true">UML of models</figcaption>
+</figure>
+<h3 id="components">Components</h3>
+<h4 id="runagentbutton">RunAgentButton</h4>
+<p>The <code>RunAgentButton</code> component is used to run the agent. It contains a button that will call the <code>runAgent</code> method of the Agent Service when clicked. Clicking the button will open a loading toast, that will be replaced by a success or error toast when the run is finished. Currently, the toast is not displayed when refreshing the page, if a run is being executed.</p>
+<h4 id="runstable">RunsTable</h4>
+<p>The <code>RunsTable</code> component is used to display the list of runs. It contains a table with the different runs. Each row of the table contains the status and the start date of the run. The status is displayed with an icon with a color depending on the status of the run.</p>
+<h4 id="runagentstepper">RunAgentStepper</h4>
+<p>The <code>RunAgentStepper</code> component is used to display the messages sent by the LLM and the tool calls made by the LLM. It contains a stepper with the different steps of the run. Each step contains the group of messages at each step of the LLM execution. The messages are grouped by sender and displayed in the same step of the stepper. The buttons enables us to open and close all the steps of the stepper.</p>
+<p>The run to display is passed as a prop to the component. The component will then display the messages and tool calls of the run.</p>
+<h4 id="messages">Messages</h4>
+<p>The three components <code>AIMessage</code>, <code>HumanMessage</code> and <code>ToolMessage</code> are used to display the content of the messages. They contain a <code>Box</code> with a <code>Text</code> component to display the content of the message. The <code>AIMessage</code> component also contains a <code>Stack</code> with the different tool calls made by the LLM.</p>
+<h1 id="fastapi-project---frontend">FastAPI Project - Frontend</h1>
+<p>The frontend is built with <a href="https://vitejs.dev/">Vite</a>, <a href="https://reactjs.org/">React</a>, <a href="https://www.typescriptlang.org/">TypeScript</a>, <a href="https://tanstack.com/query">TanStack Query</a>, <a href="https://tanstack.com/router">TanStack Router</a> and <a href="https://chakra-ui.com/">Chakra UI</a>.</p>
+<h2 id="frontend-development">Frontend development</h2>
+<p>Before you begin, ensure that you have either the Node Version Manager (nvm) or Fast Node Manager (fnm) installed on your system.</p>
+<ul>
+<li><p>To install fnm follow the <a href="https://github.com/Schniz/fnm#installation">official fnm guide</a>. If you prefer nvm, you can install it using the <a href="https://github.com/nvm-sh/nvm#installing-and-updating">official nvm guide</a>.</p></li>
+<li><p>After installing either nvm or fnm, proceed to the <code>frontend</code> directory:</p></li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> frontend</span></code></pre></div>
+<ul>
+<li>If the Node.js version specified in the <code>.nvmrc</code> file isn’t installed on your system, you can install it using the appropriate command:</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># If using fnm</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fnm</span> install</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># If using nvm</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">nvm</span> install</span></code></pre></div>
+<ul>
+<li>Once the installation is complete, switch to the installed version:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># If using fnm</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fnm</span> use </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># If using nvm</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">nvm</span> use</span></code></pre></div>
+<ul>
+<li>Within the <code>frontend</code> directory, install the necessary NPM packages:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install</span></code></pre></div>
+<ul>
+<li>And start the live server with the following <code>npm</code> script:</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run dev</span></code></pre></div>
+<ul>
+<li>Then open your browser at http://localhost:5173/.</li>
+</ul>
+<p>Notice that this live server is not running inside Docker, it’s for local development, and that is the recommended workflow. Once you are happy with your frontend, you can build the frontend Docker image and start it, to test it in a production-like environment. But building the image at every change will not be as productive as running the local development server with live reload.</p>
+<p>Check the file <code>package.json</code> to see other available options.</p>
+<h3 id="removing-the-frontend">Removing the frontend</h3>
+<p>If you are developing an API-only app and want to remove the frontend, you can do it easily:</p>
+<ul>
+<li><p>Remove the <code>./frontend</code> directory.</p></li>
+<li><p>In the <code>docker-compose.yml</code> file, remove the whole service / section <code>frontend</code>.</p></li>
+<li><p>In the <code>docker-compose.override.yml</code> file, remove the whole service / section <code>frontend</code>.</p></li>
+</ul>
+<p>Done, you have a frontend-less (api-only) app. 🤓</p>
+<hr />
+<p>If you want, you can also remove the <code>FRONTEND</code> environment variables from:</p>
+<ul>
+<li><code>.env</code></li>
+<li><code>./scripts/*.sh</code></li>
+</ul>
+<p>But it would be only to clean them up, leaving them won’t really have any effect either way.</p>
+<h2 id="generate-client">Generate Client</h2>
+<ul>
+<li><p>Start the Docker Compose stack.</p></li>
+<li><p>Download the OpenAPI JSON file from <code>http://localhost/api/v1/openapi.json</code> and copy it to a new file <code>openapi.json</code> at the root of the <code>frontend</code> directory.</p></li>
+<li><p>To simplify the names in the generated frontend client code, modify the <code>openapi.json</code> file by running the following script:</p></li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">node</span> modify-openapi-operationids.js</span></code></pre></div>
+<ul>
+<li>To generate the frontend client, run:</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> run generate-client</span></code></pre></div>
+<ul>
+<li>Commit the changes.</li>
+</ul>
+<p>Notice that everytime the backend changes (changing the OpenAPI schema), you should follow these steps again to update the frontend client.</p>
+<h2 id="using-a-remote-api">Using a Remote API</h2>
+<p>If you want to use a remote API, you can set the environment variable <code>VITE_API_URL</code> to the URL of the remote API. For example, you can set it in the <code>frontend/.env</code> file:</p>
+<pre class="env"><code>VITE_API_URL=https://my-remote-api.example.com</code></pre>
+<p>Then, when you run the frontend, it will use that URL as the base URL for the API.</p>
+<h2 id="code-structure-1">Code Structure</h2>
+<p>The frontend code is structured as follows:</p>
+<ul>
+<li><code>frontend/src</code> - The main frontend code.</li>
+<li><code>frontend/src/assets</code> - Static assets.</li>
+<li><code>frontend/src/client</code> - The generated OpenAPI client.</li>
+<li><code>frontend/src/components</code> - The different components of the frontend.</li>
+<li><code>frontend/src/hooks</code> - Custom hooks.</li>
+<li><code>frontend/src/routes</code> - The different routes of the frontend which include the pages.</li>
+<li><code>theme.tsx</code> - The Chakra UI custom theme.</li>
+</ul>
+</body>
+</html>
