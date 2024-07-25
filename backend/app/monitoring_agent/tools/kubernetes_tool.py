@@ -115,9 +115,16 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
 
         entries = logging_client.list_entries(filter_=logs_filter, page_size=50)
 
-        formatted_entries = [entry.__dict__ for entry in entries]
+        formatted_entries = [entry.to_api_repr() for entry in entries]
 
-        return formatted_entries
+        # Convert list of entries to a single string
+        entries_str = ''.join(map(str, formatted_entries))
+
+        # Get the last 5000 characters to avoid OpenAI token limit
+        if len(entries_str) > 5000:
+            entries_str = entries_str[-5000:]
+
+        return entries_str
 
     except Exception as e:
         logging.error(f"Exception with get_pod_logs: {e}")
