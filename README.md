@@ -1,4 +1,4 @@
-# Kubernetes AI Agent
+# Kubernetes LLM Agent
 
 A large language model agent designed to monitor and resolve issues within a Kubernetes cluster efficiently. This agent assists system administrators by identifying the root cause of problems, allowing them to focus on more critical and engaging tasks. The agent not only provides solutions to the issues but also documents each step taken in an incident report, ensuring thorough problem resolution and traceability.
 
