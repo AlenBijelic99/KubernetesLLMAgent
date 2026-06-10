@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import JSON, Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -127,3 +128,54 @@ class TokenPayload(SQLModel):
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=8, max_length=128)
+
+
+# Shared properties of a monitoring agent execution
+class AgentRunBase(SQLModel):
+    start_time: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    status: str = Field(max_length=32)
+
+
+# Database model, database table inferred from class name
+class AgentRun(AgentRunBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    events: list["Event"] = Relationship(back_populates="run", cascade_delete=True)
+
+
+# Event emitted during an agent run (LLM message, tool call/result or error)
+class Event(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    event_data: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    inserted_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    run_id: uuid.UUID = Field(
+        foreign_key="agentrun.id", nullable=False, ondelete="CASCADE"
+    )
+    run: AgentRun | None = Relationship(back_populates="events")
+
+
+# Properties to return via API
+class EventPublic(SQLModel):
+    id: uuid.UUID
+    event_data: dict[str, Any]
+    inserted_at: datetime
+    run_id: uuid.UUID
+
+
+class AgentRunPublic(AgentRunBase):
+    id: uuid.UUID
+
+
+class AgentRunsPublic(SQLModel):
+    data: list[AgentRunPublic]
+    count: int
+
+
+class AgentRunAndEventsPublic(AgentRunBase):
+    id: uuid.UUID
+    events: list[EventPublic]

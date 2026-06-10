@@ -94,6 +94,27 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
 
+    # Timezone used for timestamps shown in agent reports
+    TIMEZONE: str = "Europe/Zurich"
+
+    # Kubernetes cluster monitored by the agent
+    NAMESPACES: Annotated[list[str] | str, BeforeValidator(parse_cors)] = ["default"]
+    KUBE_HOST: str | None = None
+    KUBECONFIG_FILE: str | None = None
+    GOOGLE_APPLICATION_CREDENTIALS_FILE: str | None = None
+    K8S_VERIFY_SSL: bool = True
+    K8S_SSL_CA_CERT: str | None = None
+
+    # Prometheus instance queried by the agent
+    PROMETHEUS_URL: str | None = None
+    PROMETHEUS_VERIFY_SSL: bool = True
+
+    # LLM used by the agent: gpt-* models use OpenAI, anything else is
+    # assumed to be an Ollama model served at OLLAMA_BASE_URL
+    LLM_MODEL: str = "gpt-4o"
+    OPENAI_API_KEY: str | None = None
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

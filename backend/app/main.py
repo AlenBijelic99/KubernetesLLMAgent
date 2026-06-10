@@ -1,10 +1,11 @@
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
+from app.websocket.websocket import manager
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -26,8 +27,20 @@ if settings.all_cors_origins:
         CORSMiddleware,
         allow_origins=settings.all_cors_origins,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
     )
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket) -> None:
+    await manager.connect(websocket)
+    try:
+        while True:
+            # Keep the connection open; clients only listen for broadcasts.
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

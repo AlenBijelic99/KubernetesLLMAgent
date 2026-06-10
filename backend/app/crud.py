@@ -1,10 +1,11 @@
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import AgentRun, Event, Item, ItemCreate, User, UserCreate, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -66,3 +67,37 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_run(*, session: Session, status: str = "running") -> AgentRun:
+    run = AgentRun(status=status)
+    session.add(run)
+    session.commit()
+    session.refresh(run)
+    return run
+
+
+def create_event(
+    *, session: Session, run_id: uuid.UUID, event_data: dict[str, Any]
+) -> Event:
+    event = Event(event_data=event_data, run_id=run_id)
+    session.add(event)
+    session.commit()
+    session.refresh(event)
+    return event
+
+
+def get_run_events(*, session: Session, run_id: uuid.UUID) -> Sequence[Event]:
+    statement = select(Event).where(Event.run_id == run_id)
+    return session.exec(statement).all()
+
+
+def set_run_status(*, session: Session, run_id: uuid.UUID, status: str) -> AgentRun:
+    run = session.get(AgentRun, run_id)
+    if run is None:
+        raise ValueError(f"Agent run {run_id} not found")
+    run.status = status
+    session.add(run)
+    session.commit()
+    session.refresh(run)
+    return run
