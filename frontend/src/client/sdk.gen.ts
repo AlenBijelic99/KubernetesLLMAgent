@@ -3,7 +3,67 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AgentRunAgentResponse, AgentGetRunsData, AgentGetRunsResponse, AgentGetRunData, AgentGetRunResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, PrivateCreateUserData, PrivateCreateUserResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class AgentService {
+    /**
+     * Run Agent
+     * Run the monitoring agent. Events are broadcast over the websocket while
+     * the run progresses and are persisted with the run.
+     * @returns Message Successful Response
+     * @throws ApiError
+     */
+    public static runAgent(): CancelablePromise<AgentRunAgentResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/agent/run'
+        });
+    }
+    
+    /**
+     * Get Runs
+     * Get all agent executions.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns AgentRunsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getRuns(data: AgentGetRunsData = {}): CancelablePromise<AgentGetRunsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/agent/runs',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Run
+     * Get an agent execution by id, with its events in chronological order.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns AgentRunAndEventsPublic Successful Response
+     * @throws ApiError
+     */
+    public static getRun(data: AgentGetRunData): CancelablePromise<AgentGetRunResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/agent/run/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class ItemsService {
     /**
