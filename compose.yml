@@ -90,6 +90,11 @@ services:
         condition: service_completed_successfully
     env_file:
       - .env
+    volumes:
+      # Kubernetes/GCP credentials used by the monitoring agent (read-only).
+      # GOOGLE_APPLICATION_CREDENTIALS_FILE in .env should point inside
+      # /app/.kube (e.g. /app/.kube/service-account.json).
+      - ${KUBE_CONFIG_DIR:-~/.kube}:/app/.kube:ro
     environment:
       - DOMAIN=${DOMAIN}
       - FRONTEND_HOST=${FRONTEND_HOST?Variable not set}

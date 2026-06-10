@@ -106,11 +106,10 @@ ENVIRONMENT=
 PROJECT_NAME=
 STACK_NAME=
 
-BACKEND_CORS_ORIGINS=[] # Add the frontend URL here
+BACKEND_CORS_ORIGINS= # Add the frontend URL here (comma-separated)
 SECRET_KEY=
 FIRST_SUPERUSER=
 FIRST_SUPERUSER_PASSWORD=
-USERS_OPEN_REGISTRATION=False # Set to True if you want to allow open registration
 
 POSTGRES_SERVER=
 POSTGRES_PORT=5432
@@ -121,30 +120,42 @@ POSTGRES_PASSWORD=
 DOCKER_IMAGE_BACKEND=backend
 DOCKER_IMAGE_FRONTEND=frontend
 
-TIMEZONE="Europe/Zurich" # Set your timezone
+TIMEZONE=Europe/Zurich # Set your timezone
 
-NAMESPACES=
+NAMESPACES=default # Comma-separated list of namespaces to monitor
 KUBE_HOST=
-KUBECONFIG_PATH=
+KUBE_CONFIG_DIR=~/.kube
 GOOGLE_APPLICATION_CREDENTIALS_FILE=
+K8S_VERIFY_SSL=True
+K8S_SSL_CA_CERT=
 
 PROMETHEUS_URL=
+PROMETHEUS_VERIFY_SSL=True
 
-LANGCHAIN_TRACING_V2=true   # Use LangSmith for tracing
+LANGCHAIN_TRACING_V2=false  # Set to true to use LangSmith for tracing
 LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
 LANGCHAIN_API_KEY=  # https://smith.langchain.com/settings
 OPENAI_API_KEY=     # https://platform.openai.com/account/api-keys
-LLM_MODEL="gpt-4o" # Set the model you want to use : gpt-4o, gpt-3.5-turbo or llama3
-OLLAMA_BASE_URL="http://host.docker.internal:11434" # Only if you use LLM_MODEL=llama3. You will be using Llama3 model running in Ollama
+LLM_MODEL=gpt-4o # gpt-* models use OpenAI; any other name (e.g. llama3.1) is served by Ollama
+OLLAMA_BASE_URL="http://host.docker.internal:11434" # Only used when LLM_MODEL is not a gpt-* model
 ```
+
+Note: unlike the original version of this project, user self-registration is
+always enabled by the underlying template (the `USERS_OPEN_REGISTRATION`
+variable no longer exists). Remove the `/signup` route in the frontend if you
+do not want open registration.
 
 `PROMETHEUS_URL` is the URL of the Prometheus server that scrapes the metrics from the Kubernetes cluster. It generally looks like `http://prometheus-ip:9090`.
 
-`KUBE_HOST` is the IP address of the Kubernetes cluster. It can be found in the cluster details of the Google Cloud Platform console.
+`PROMETHEUS_VERIFY_SSL` controls TLS certificate verification when connecting to Prometheus. Keep it `True` in production; only set it to `False` for a local or test Prometheus without a valid certificate.
 
-`KUBECONFIG_PATH` is the path to the kubeconfig file directory. It is used to authenticate with the Kubernetes cluster. By default, on Windows it is `C:\Users\username\.kube` and on Linux it is `~/.kube`.
+`KUBE_HOST` is the URL of the Kubernetes API server (e.g. `https://<cluster-endpoint>`). It can be found in the cluster details of the Google Cloud Platform console.
 
-`GOOGLE_APPLICATION_CREDENTIALS_FILE` is the name of the Google Service Account JSON file. It should be placed among the kubeconfig files. You can download it from the Google Cloud Platform console.
+`KUBE_CONFIG_DIR` is the host directory that is mounted read-only into the backend container at `/app/.kube`. By default, on Windows it is `C:\Users\username\.kube` and on Linux it is `~/.kube`. Place the Google Service Account JSON file in this directory.
+
+`GOOGLE_APPLICATION_CREDENTIALS_FILE` is the path to the Google Service Account JSON file as seen from inside the backend container, e.g. `/app/.kube/service-account.json`. You can download the file from the Google Cloud Platform console.
+
+`K8S_VERIFY_SSL` controls TLS certificate verification towards the Kubernetes API and is enabled by default. GKE clusters use a private cluster CA, so to connect with verification enabled, download the cluster CA certificate (cluster details > security > cluster CA certificate, or `gcloud container clusters describe CLUSTER_NAME --format="value(masterAuth.clusterCaCertificate)" | base64 -d`), place it in `KUBE_CONFIG_DIR`, and set `K8S_SSL_CA_CERT=/app/.kube/cluster-ca.pem`.
 
 By setting up emails environment variables, you can enable email based password recovery.
 
@@ -153,21 +164,21 @@ By setting up emails environment variables, you can enable email based password 
 To build and start the Docker containers, run the following command:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-The `docker-compose.yaml` files are provided by the [Full Stack FastAPI template](https://github.com/tiangolo/full-stack-fastapi-template).
+The `compose.yml` files are provided by the [Full Stack FastAPI template](https://github.com/fastapi/full-stack-fastapi-template).
 
-If everything is set up correctly, you should be able to access the OpenAPI documentation at `http://localhost:8080/docs` and the frontend at `http://localhost:8080`.
+If everything is set up correctly, you should be able to access the OpenAPI documentation at `http://localhost:8000/docs` and the frontend at `http://localhost:5173`.
 
 If you encounter any issues, check the backend logs for any configuration errors.
 
 ### Step 4: Set up the namespace to monitor
 
-Currently, the agent is monitoring the namespaces you specify in the `backend/app/monitoring_agent/main.py` file. You can add or remove namespaces as needed.
+The agent monitors the namespaces listed in the `NAMESPACES` environment variable in `.env` (comma-separated):
 
-```python
-NAMESPACES=["testing-apps"]
+```bash
+NAMESPACES=testing-apps,default
 ```
 
 ## LangSmith
