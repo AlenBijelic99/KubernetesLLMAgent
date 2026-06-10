@@ -31,7 +31,7 @@ def parse_config(config: dict[str, Any]) -> str:
     )
 
 
-def agent_node(state: AgentState, agent: Runnable, name: str) -> dict[str, Any]:
+def agent_node(state: AgentState, agent: Runnable[Any, Any], name: str) -> dict[str, Any]:
     """
     Helper function to create a node for a given agent.
     """
@@ -75,7 +75,7 @@ _NODE_TASKS = {
 }
 
 
-def make_agent_node(name: str) -> Callable[[AgentState], dict[str, Any]]:
+def make_agent_node(name: str) -> Callable[..., dict[str, Any]]:
     """
     Build the graph node for the given agent name.
 

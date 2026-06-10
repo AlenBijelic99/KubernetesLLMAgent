@@ -11,7 +11,9 @@ class KubernetesConfig:
     Manage the configuration of the Kubernetes client
     """
 
-    def __init__(self, kube_host: str | None, credentials_path: str | None, scopes: list[str]):
+    def __init__(
+        self, kube_host: str | None, credentials_path: str | None, scopes: list[str]
+    ):
         """
         Initialize the Kubernetes configuration
         """
@@ -32,7 +34,7 @@ class KubernetesConfig:
             )
 
         # Load the service account credentials
-        credentials = service_account.Credentials.from_service_account_file(
+        credentials = service_account.Credentials.from_service_account_file(  # type: ignore[no-untyped-call]
             self.credentials_path, scopes=self.scopes
         )
 
@@ -84,12 +86,14 @@ class GoogleCloudLogging:
             )
 
         # Load the service account credentials
-        credentials = service_account.Credentials.from_service_account_file(
+        credentials = service_account.Credentials.from_service_account_file(  # type: ignore[no-untyped-call]
             self.credentials_path
         )
 
         # Create a logging client
-        self.client = gcloud_logging.Client(credentials=credentials)
+        self.client = gcloud_logging.Client(  # type: ignore[no-untyped-call]
+            credentials=credentials
+        )
 
     def get_client(self) -> gcloud_logging.Client:
         """

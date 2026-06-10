@@ -1,3 +1,5 @@
+from typing import Any
+
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
@@ -6,7 +8,7 @@ from langchain_core.tools import BaseTool
 
 def create_agent(
     llm: BaseChatModel, tools: list[BaseTool], system_message: str
-) -> Runnable:
+) -> Runnable[Any, Any]:
     """
     Create an agent with the given LLM and tools.
     """

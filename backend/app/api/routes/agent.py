@@ -3,7 +3,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-from sqlmodel import func, select
+from sqlmodel import col, func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.crud import create_run
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/agent", tags=["agent"])
 
 
 @router.post("/run", response_model=Message)
-async def run_agent(session: SessionDep, current_user: CurrentUser) -> Any:
+async def run_agent(session: SessionDep, _current_user: CurrentUser) -> Any:
     """
     Run the monitoring agent. Events are broadcast over the websocket while
     the run progresses and are persisted with the run.
@@ -32,7 +32,7 @@ async def run_agent(session: SessionDep, current_user: CurrentUser) -> Any:
 
 @router.get("/runs", response_model=AgentRunsPublic)
 def get_runs(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep, _current_user: CurrentUser, skip: int = 0, limit: int = 100
 ) -> Any:
     """
     Get all agent executions.
@@ -41,7 +41,7 @@ def get_runs(
     count = session.exec(count_statement).one()
     statement = (
         select(AgentRun)
-        .order_by(AgentRun.start_time.desc())  # type: ignore[attr-defined]
+        .order_by(col(AgentRun.start_time).desc())
         .offset(skip)
         .limit(limit)
     )
@@ -50,7 +50,7 @@ def get_runs(
 
 
 @router.get("/run/{id}", response_model=AgentRunAndEventsPublic)
-def get_run(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> Any:
+def get_run(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) -> Any:
     """
     Get an agent execution by id, with its events in chronological order.
     """

@@ -82,7 +82,7 @@ def get_nodes_resources() -> list[dict[str, Any]] | str:
         for node in nodes.items:
             capacity = node.status.capacity
             allocatable = node.status.allocatable
-            usage = next(
+            usage: dict[str, Any] = next(
                 (
                     item["usage"]
                     for item in node_metrics["items"]
@@ -124,7 +124,9 @@ def get_pod_logs(logs_filter: str) -> str | list[Any]:
     try:
         logging_client = gcloud_logging_config.get_client()
 
-        entries = logging_client.list_entries(filter_=logs_filter, page_size=50)
+        entries = logging_client.list_entries(  # type: ignore[no-untyped-call]
+            filter_=logs_filter, page_size=50
+        )
 
         formatted_entries = [entry.to_api_repr() for entry in entries]
 
