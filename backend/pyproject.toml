@@ -19,6 +19,16 @@ dependencies = [
     "sentry-sdk[fastapi]<2.0.0,>=1.40.6",
     "pyjwt<3.0.0,>=2.8.0",
     "pwdlib[argon2,bcrypt]>=0.3.0",
+    # Monitoring agent
+    "langgraph>=1.2.4,<2.0.0",
+    "langgraph-prebuilt>=1.0.0,<2.0.0",
+    "langchain-core>=1.0.0,<2.0.0",
+    "langchain-openai>=1.0.0,<2.0.0",
+    "langchain-ollama>=1.1.0,<2.0.0",
+    "kubernetes>=34.0.0,<35.0.0",
+    "prometheus-api-client>=0.5.7,<0.6.0",
+    "google-auth>=2.30.0,<3.0.0",
+    "google-cloud-logging>=3.10.0,<4.0.0",
 ]
 
 [dependency-groups]
