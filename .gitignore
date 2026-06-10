@@ -5,3 +5,6 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local environment with real secrets (use .env.example as a starting point)
+.env
