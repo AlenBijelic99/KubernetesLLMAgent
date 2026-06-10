@@ -15,6 +15,9 @@ export interface LLMMessage {
   name?: string | null
   tool_calls?: ToolCall[]
   tool_call_id?: string
+  response_metadata?: {
+    model_name?: string
+  }
 }
 
 // A graph update event: one key per node that produced an update
