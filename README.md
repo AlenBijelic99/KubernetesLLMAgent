@@ -27,11 +27,20 @@ If an error occurs during the execution of a step, the agent will stop the workf
 ![Graph flow](img/realisation_langgraphworkflow.png)
 
 ## Technology Stack
-- [**Full Stack FastAPI Template**](https://github.com/tiangolo/full-stack-fastapi-template) for the backend, frontend and DB.
+- [**Full Stack FastAPI Template**](https://github.com/fastapi/full-stack-fastapi-template) for the backend, frontend and DB.
 - [**LangGraph**](https://langchain-ai.github.io/langgraph/) and [**LangChain**](https://www.langchain.com/) for the AI agent.
 - [**Google Kubernetes Engine**](https://cloud.google.com/kubernetes-engine) for the Kubernetes cluster.
 - [**Prometheus**](https://prometheus.io/) for monitoring.
 - [**Google Cloud Logging**](https://cloud.google.com/logging) to access deployed application logs.
+
+> **2026 modernization note**: the project was re-based onto
+> [full-stack-fastapi-template **0.10.0**](https://github.com/fastapi/full-stack-fastapi-template/blob/master/release-notes.md)
+> (FastAPI + SQLModel backend managed with **uv**, React 19 + shadcn/ui +
+> Tailwind CSS 4 frontend, Postgres 18, `compose.yml`) and the agent was
+> migrated to **LangGraph 1.x / LangChain 1.x** with `langchain-ollama` for
+> local models. Screenshots in this README may still show the original
+> Chakra UI interface. The next re-sync with the upstream template should
+> start from that tag.
 
 ## Documentation
 

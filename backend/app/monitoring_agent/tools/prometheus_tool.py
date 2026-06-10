@@ -1,9 +1,7 @@
-import os
-from dotenv import load_dotenv
 from langchain_core.tools import tool
 from prometheus_api_client import PrometheusConnect
 
-load_dotenv()
+from app.core.config import settings
 
 
 @tool
@@ -25,47 +23,29 @@ def execute_prometheus_query(query: str) -> str:
     >>> execute_prometheus_query('sum(rate(http_requests_total{namespace="testing-apps"}[5m])) by (job)')
     '{job="metric-app"}: 0'
     """
-
     try:
-        prometheus_url = os.getenv("PROMETHEUS_URL", "http://localhost:9090")
+        prometheus_url = settings.PROMETHEUS_URL or "http://localhost:9090"
 
-        # Connect to Prometheus
-        prometheus = PrometheusConnect(url=prometheus_url, disable_ssl=True)
+        # Connect to Prometheus. TLS verification is enabled unless
+        # explicitly disabled with PROMETHEUS_VERIFY_SSL=False.
+        prometheus = PrometheusConnect(
+            url=prometheus_url, disable_ssl=not settings.PROMETHEUS_VERIFY_SSL
+        )
 
         if not prometheus.check_prometheus_connection():
             return "Prometheus is not available"
 
-        # Sanitize input to avoid injection
+        # The LLM sometimes escapes quotes in the generated PromQL
         sanitized_query = query.replace('\\"', '"')
 
         # Execute the query
         data = prometheus.custom_query(query=sanitized_query)
 
         # Format the output
-        result = "\n".join([f"{metric['metric']}: {metric['value'][1]}" for metric in data])
+        result = "\n".join(
+            f"{metric['metric']}: {metric['value'][1]}" for metric in data
+        )
 
         return result
     except Exception as e:
         return f"Error executing Prometheus query: {e}"
-
-@tool
-def get_http_request_per_seconds_by_job(job: str) -> str:
-    """
-    Get the HTTP request per seconds for a specific job in the last minute.
-
-    Parameters:
-    - job (str): The job name to filter the request duration. It is made of {namespace}-{service name}.
-
-    Returns:
-    - str: The request duration for the specified job in the last minute.
-
-    Notes:
-    - Not all jobs may have HTTP requests, so the result may be 0 or No data found.
-
-    Example usage:
-    >>> get_http_request_per_seconds_by_job('sock-shop-user')
-    '{job="sock-shop-user"}: 0.7'
-    """
-
-    query = f'sum(rate(request_duration_seconds_count{{job="{job}"}}[5m])) by (job)'
-    return execute_prometheus_query(query)

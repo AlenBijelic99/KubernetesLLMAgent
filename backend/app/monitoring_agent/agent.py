@@ -1,16 +1,16 @@
-import logging
+from typing import Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_experimental.llms.ollama_functions import OllamaFunctions
-from langchain_openai import ChatOpenAI
-
-from app.monitoring_agent.tools.tool_binder import extract_tool_metadata
+from langchain_core.runnables import Runnable
+from langchain_core.tools import BaseTool
 
 
-def create_agent(llm, tools, system_message: str):
+def create_agent(
+    llm: BaseChatModel, tools: list[BaseTool], system_message: str
+) -> Runnable[Any, Any]:
     """
-    Create and agent with the given LLM and tools.
+    Create an agent with the given LLM and tools.
     """
     system_message_text = (
         "You are a helpful AI assistant, collaborating with other assistants."
@@ -37,22 +37,6 @@ def create_agent(llm, tools, system_message: str):
     prompt = prompt.partial(system_message=system_message)
 
     if tools:
-        prompt = prompt.partial(tool_names=", ".join([tool.name for tool in tools]))
-
-    # Bind the tools to the LLM
-    # Note: This is a temporary solution until we have a better way to handle tools with Ollama. To call tools with
-    # Ollama we have to user OllamaFunctions which is an experimental feature from LangChain. If no tools are needed for
-    # a task, better use Ollama directly.
-    if tools:
-        if isinstance(llm, ChatOpenAI):
-            prompt_with_llm = prompt | llm.bind_tools(tools)
-        elif isinstance(llm, OllamaFunctions):
-            binded_tools = [extract_tool_metadata(tool) for tool in tools]
-            print("binded_tools: ", binded_tools)
-            prompt_with_llm = prompt | llm.bind_tools(tools=tools)
-        else:
-            raise Exception("Unsupported LLM model")
-    else:
-        prompt_with_llm = prompt | llm
-
-    return prompt_with_llm
+        prompt = prompt.partial(tool_names=", ".join(tool.name for tool in tools))
+        return prompt | llm.bind_tools(tools)
+    return prompt | llm

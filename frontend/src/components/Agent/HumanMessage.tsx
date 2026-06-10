@@ -1,35 +1,21 @@
-import { Box, Text, Heading, useColorMode } from "@chakra-ui/react";
+import { type LLMMessage, messageText } from "@/lib/agent-types"
 
 interface HumanMessageProps {
-    message: any;
+  message: LLMMessage
 }
 
 const HumanMessage = ({ message }: HumanMessageProps) => {
-    const { colorMode } = useColorMode();
+  const text = messageText(message.content)
+  if (!text) return null
 
-    return (
-        <Box
-            border="1px"
-            borderColor={colorMode === "dark" ? "teal.300" : "teal.500"}
-            borderRadius="md"
-            p={4}
-            my={2}
-            bg={colorMode === "dark" ? "gray.700" : "gray.100"}
-            shadow="md"
-        >
-            {message.content !== "" && (
-                <>
-                    <Text fontSize='sm'>{message.response_metadata.model_name}</Text>
-                    <Heading as="h3" size="md" mb={2} color={colorMode === "dark" ? "teal.300" : "teal.700"}>
-                        Human Message
-                    </Heading>
-                    <Text fontSize='md' mb={4} p={2} bg={colorMode === "dark" ? "gray.800" : "white"} borderRadius="md">
-                        {message.content}
-                    </Text>
-                </>
-            )}
-        </Box>
-    );
-};
+  return (
+    <div className="rounded-md border border-primary/50 bg-muted/50 p-4 my-2 shadow-sm">
+      <h3 className="text-sm font-semibold text-primary mb-2">Instruction</h3>
+      <p className="whitespace-pre-wrap break-words rounded-md bg-background p-2 text-sm">
+        {text}
+      </p>
+    </div>
+  )
+}
 
-export default HumanMessage;
+export default HumanMessage

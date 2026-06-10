@@ -1,191 +1,181 @@
-import {useEffect, useState} from "react";
-import {
-    Box,
-    Button,
-    HStack,
-    Icon,
-    Step,
-    StepDescription,
-    StepIndicator,
-    Stepper,
-    StepSeparator,
-    StepStatus,
-    StepTitle,
-    Text,
-    useColorMode,
-    useSteps,
-} from "@chakra-ui/react";
-import {CheckIcon, ChevronDownIcon, ChevronUpIcon} from "@chakra-ui/icons";
-import {AgentRunAndEventsPublic, Event} from "../../client";
-import {MdDoNotDisturbOn} from "react-icons/md";
-import ToolMessage from "./ToolMessage.tsx";
-import AIMessage from "./AIMessage.tsx";
-import HumanMessage from "./HumanMessage.tsx";
+import { Check, ChevronDown, ChevronUp, CircleMinus } from "lucide-react"
+import { useState } from "react"
+
+import type { AgentRunAndEventsPublic, EventPublic } from "@/client"
+import AIMessage from "@/components/Agent/AIMessage"
+import ErrorMessage from "@/components/Agent/ErrorMessage"
+import HumanMessage from "@/components/Agent/HumanMessage"
+import ToolMessage from "@/components/Agent/ToolMessage"
+import { Button } from "@/components/ui/button"
+import type { AgentNodeUpdate, LLMMessage } from "@/lib/agent-types"
+import { cn } from "@/lib/utils"
 
 interface RunAgentStepperProps {
-    run: AgentRunAndEventsPublic;
+  run: AgentRunAndEventsPublic
 }
 
-const stepKeys = ['metric_analyser', 'diagnostic', 'solution', 'incident_reporter'];
+const stepKeys = [
+  "metric_analyser",
+  "diagnostic",
+  "solution",
+  "incident_reporter",
+]
 
-const groupNames: { [key: string]: string } = {
-    'metric_analyser': 'Metric Analysis',
-    'diagnostic': 'Diagnostic',
-    'solution': 'Solution',
-    'incident_reporter': 'Incident Report'
-};
+const groupNames: Record<string, string> = {
+  metric_analyser: "Metric Analysis",
+  diagnostic: "Diagnostic",
+  solution: "Solution",
+  incident_reporter: "Incident Report",
+}
 
-// Function to group events by key in event_data except when a specific key is encountered
-const groupEvents = (events: Event[]) => {
-    let groups: { [key: string]: Event[] } = {
-        'metric_analyser': [],
-        'diagnostic': [],
-        'solution': [],
-        'incident_reporter': []
-    };
+// Group events by the agent that produced them. Tool events (call_tool) and
+// errors are attached to the step that triggered them.
+const groupEvents = (events: EventPublic[]) => {
+  const groups: Record<string, EventPublic[]> = {
+    metric_analyser: [],
+    diagnostic: [],
+    solution: [],
+    incident_reporter: [],
+  }
 
-    let lastKey: string | null = null;
+  let lastKey: string | null = null
 
-    events.forEach(event => {
-        const key = Object.keys(event.event_data)[0];
-        if (key !== 'call_tool') {
-            if (groups[key]) {
-                groups[key].push(event);
-                lastKey = key;
-            }
-        } else if (lastKey && groups[lastKey]) {
-            groups[lastKey].push(event);
+  for (const event of events) {
+    const key = Object.keys(event.event_data)[0]
+    if (groups[key]) {
+      groups[key].push(event)
+      lastKey = key
+    } else if (lastKey) {
+      // call_tool updates and error events belong to the previous step
+      groups[lastKey].push(event)
+    }
+  }
+
+  return groups
+}
+
+const EventMessages = ({ event }: { event: EventPublic }) => {
+  const eventData = event.event_data as Record<string, unknown>
+
+  if (typeof eventData.error === "string" || eventData.type === "Error") {
+    return <ErrorMessage error={String(eventData.error ?? "Unknown error")} />
+  }
+
+  const nodeUpdate = Object.values(eventData)[0] as AgentNodeUpdate | undefined
+  const messages: LLMMessage[] = nodeUpdate?.messages ?? []
+
+  return (
+    <>
+      {messages.map((message, index) => {
+        switch (message.type) {
+          case "human":
+            return <HumanMessage key={index} message={message} />
+          case "ai":
+            return <AIMessage key={index} message={message} />
+          case "tool":
+            return <ToolMessage key={index} message={message} />
+          default:
+            return <ErrorMessage key={index} error="Unknown message type" />
         }
-    });
+      })}
+    </>
+  )
+}
 
-    return groups;
-};
+// NOTE: render with key={run.id} so the expanded state resets when
+// another run is selected.
+const RunAgentStepper = ({ run }: RunAgentStepperProps) => {
+  const eventGroups = groupEvents(run.events)
+  const [expandedSteps, setExpandedSteps] = useState<string[]>([])
 
-const RunAgentStepper = ({run}: RunAgentStepperProps) => {
-    console.log(run)
-    const eventGroups = groupEvents(run.events);
+  const toggleExpand = (key: string) => {
+    setExpandedSteps((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    )
+  }
 
-    // Find the index of the last step with data
-    const lastStepWithDataIndex = stepKeys.reduce((lastIndex, key, index) => {
-        return eventGroups[key].length > 0 ? index + 1 : lastIndex;
-    }, 0);
+  return (
+    <div>
+      <div className="mb-4 flex gap-2">
+        <Button size="sm" onClick={() => setExpandedSteps(stepKeys)}>
+          Expand All
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setExpandedSteps([])}
+        >
+          Collapse All
+        </Button>
+      </div>
+      <ol>
+        {stepKeys.map((key, index) => {
+          const hasData = eventGroups[key].length > 0
+          const expanded = expandedSteps.includes(key)
+          const isLast = index === stepKeys.length - 1
 
-    const {activeStep} = useSteps({
-        index: lastStepWithDataIndex,
-        count: stepKeys.length,
-    });
+          return (
+            <li key={key} className="relative flex gap-4">
+              {/* Indicator column */}
+              <div className="flex flex-col items-center">
+                <div
+                  className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2",
+                    hasData
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-muted text-muted-foreground",
+                  )}
+                >
+                  {hasData ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <CircleMinus className="h-4 w-4" />
+                  )}
+                </div>
+                {!isLast && <div className="w-px grow bg-border" />}
+              </div>
 
-    const [expandedSteps, setExpandedSteps] = useState<string[]>([]);
-    const {colorMode} = useColorMode();
+              {/* Step content */}
+              <div className="min-h-16 w-full pb-6">
+                <p className="font-semibold leading-8">{groupNames[key]}</p>
+                {hasData && (
+                  <div
+                    className={cn(
+                      "relative overflow-hidden text-sm text-muted-foreground",
+                      !expanded && "max-h-28",
+                    )}
+                  >
+                    <div className={cn(expanded && "mb-8")}>
+                      {eventGroups[key].map((event) => (
+                        <EventMessages key={event.id} event={event} />
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(key)}
+                      className={cn(
+                        "absolute inset-x-0 bottom-0 flex cursor-pointer items-end justify-center",
+                        expanded
+                          ? "h-8"
+                          : "h-14 bg-gradient-to-t from-background to-transparent",
+                      )}
+                      aria-label={expanded ? "Collapse step" : "Expand step"}
+                    >
+                      {expanded ? (
+                        <ChevronUp className="h-6 w-6" />
+                      ) : (
+                        <ChevronDown className="h-6 w-6" />
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ol>
+    </div>
+  )
+}
 
-    useEffect(() => {
-        setExpandedSteps([]); // Reset expanded steps when the run changes
-    }, [run]);
-
-    const toggleExpand = (key: string) => {
-        setExpandedSteps(prev =>
-            prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
-        );
-    };
-
-    const expandAll = () => {
-        setExpandedSteps(stepKeys);
-    };
-
-    const collapseAll = () => {
-        setExpandedSteps([]);
-    };
-
-    return (
-        <Box>
-            <HStack mb={4}>
-                <Button onClick={expandAll} colorScheme="teal">Expand All</Button>
-                <Button onClick={collapseAll} colorScheme="teal">Collapse All</Button>
-            </HStack>
-            <Stepper colorScheme="teal" index={activeStep} size="sm" orientation="vertical" gap="0" padding="10">
-                {stepKeys.map((key) => (
-                    <Box key={key} width='100%'>
-                        <Step>
-                            <StepIndicator>
-                                <StepStatus complete={eventGroups[key].length > 0 ? <CheckIcon/> :
-                                    <Icon height='1.5em' width='1.5em'
-                                          color={colorMode === "dark" ? "gray.800" : "white"} as={MdDoNotDisturbOn}/>}/>
-                            </StepIndicator>
-
-                            <Box flexShrink="0" textAlign="left" width="100%" minHeight="60px" mb="4">
-                                <StepTitle>{`${groupNames[key]}`}</StepTitle>
-                                <StepDescription as="div">
-                                    {eventGroups[key].length > 0 && (
-                                        <Box
-                                            whiteSpace="pre-wrap"
-                                            wordBreak="break-word"
-                                            overflowWrap="anywhere"
-                                            maxHeight={expandedSteps.includes(key) ? "none" : "100px"}
-                                            overflow="hidden"
-                                            position="relative"
-                                        >
-                                            <Box mb={expandedSteps.includes(key) ? 8 : 0}>
-                                                {eventGroups[key].map((event, subIndex) => {
-                                                    const eventKey = Object.keys(event.event_data)[0];
-                                                    const messages = event.event_data[eventKey].messages;
-
-                                                    return (
-                                                        <Box key={subIndex} mb={2}>
-                                                            {messages.map((message, msgIndex) => (
-                                                                <Box key={msgIndex}>
-                                                                    {
-                                                                        <>
-                                                                            {message.type === 'human' ? (
-                                                                                <HumanMessage message={message}/>
-                                                                            ) : message.type === 'ai' ? (
-                                                                                <AIMessage message={message}/>
-                                                                            ) : message.type === 'tool' ? (
-                                                                                <ToolMessage message={message}/>
-                                                                            ) : message.type === 'error' ? (
-                                                                                <ToolMessage message={message}/>
-                                                                            ) : (
-                                                                                <Text>Unknown message type</Text>
-                                                                            )}
-                                                                        </>
-                                                                    }
-                                                                </Box>
-                                                            ))}
-                                                        </Box>
-                                                    );
-                                                })}
-                                            </Box>
-                                            <Box
-                                                position="absolute"
-                                                bottom="0"
-                                                left="0"
-                                                right="0"
-                                                height={expandedSteps.includes(key) ? 30 : 50}
-                                                display="flex"
-                                                justifyContent="center"
-                                                alignItems="flex-end"
-                                                cursor="pointer"
-                                                onClick={() => toggleExpand(key)}
-                                                {...(!expandedSteps.includes(key) && {
-                                                    bgGradient: colorMode === "dark"
-                                                        ? "linear(to-t, gray.800, rgba(255,255,255,0))"
-                                                        : "linear(to-t, white, rgba(255,255,255,0))"
-                                                })}
-                                            >
-                                                {expandedSteps.includes(key) ? <ChevronUpIcon boxSize={6}/> :
-                                                    <ChevronDownIcon boxSize={6}/>}
-                                            </Box>
-                                        </Box>
-                                    )}
-                                </StepDescription>
-                            </Box>
-
-                            <StepSeparator/>
-                        </Step>
-                    </Box>
-                ))}
-            </Stepper>
-        </Box>
-    );
-};
-
-export default RunAgentStepper;
+export default RunAgentStepper

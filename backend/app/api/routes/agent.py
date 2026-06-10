@@ -1,60 +1,61 @@
 import logging
 import uuid
-from typing import List
+from typing import Any
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, FastAPI
-from sqlalchemy.orm import joinedload
-from sqlmodel import select, desc
+from fastapi import APIRouter, HTTPException
+from sqlmodel import col, func, select
 
-from app.api.deps import SessionDep, CurrentUser
+from app.api.deps import CurrentUser, SessionDep
 from app.crud import create_run
-from app.models import AgentRun, AgentRunsPublic, Event, AgentRunPublic, AgentRunAndEventsPublic
-
-# Importer l'agent
+from app.models import AgentRun, AgentRunAndEventsPublic, AgentRunsPublic, Message
 from app.monitoring_agent.main import run
 from app.websocket.websocket import manager
 
-router = APIRouter()
+router = APIRouter(prefix="/agent", tags=["agent"])
 
 
-@router.post("/run")
-async def run_agent(session: SessionDep):
+@router.post("/run", response_model=Message)
+async def run_agent(session: SessionDep, _current_user: CurrentUser) -> Any:
     """
-    Run the agent
+    Run the monitoring agent. Events are broadcast over the websocket while
+    the run progresses and are persisted with the run.
     """
-    logging.warning("Running agent")
+    agent_run = create_run(session=session)
+    logging.info("Agent run %s created", agent_run.id)
     try:
-        agent_run = create_run(session)
-        logging.warning("Agent run created")
-
         await run(manager, session, agent_run.id)
-        logging.warning("Agent runned")
-        return {"message": "Agent runned successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        logging.exception("Agent run %s failed", agent_run.id)
+        raise HTTPException(status_code=500, detail="Agent run failed")
+    return Message(message="Agent run finished successfully")
 
 
 @router.get("/runs", response_model=AgentRunsPublic)
-async def get_runs(session: SessionDep, current_user: CurrentUser) -> AgentRunsPublic:
+def get_runs(
+    session: SessionDep, _current_user: CurrentUser, skip: int = 0, limit: int = 100
+) -> Any:
     """
-    Get all agent executions
+    Get all agent executions.
     """
-    logging.warning("Getting runs")
-
-    runs = session.exec(select(AgentRun).order_by(desc(AgentRun.start_time)))
-
-    return AgentRunsPublic(data=runs, count=10)
+    count_statement = select(func.count()).select_from(AgentRun)
+    count = session.exec(count_statement).one()
+    statement = (
+        select(AgentRun)
+        .order_by(col(AgentRun.start_time).desc())
+        .offset(skip)
+        .limit(limit)
+    )
+    runs = session.exec(statement).all()
+    return AgentRunsPublic(data=runs, count=count)
 
 
 @router.get("/run/{id}", response_model=AgentRunAndEventsPublic)
-async def get_run(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) -> AgentRunAndEventsPublic:
+def get_run(session: SessionDep, _current_user: CurrentUser, id: uuid.UUID) -> Any:
     """
-    Get an agent execution by id
+    Get an agent execution by id, with its events in chronological order.
     """
-    run = session.get(AgentRun, id)
-
-    run.events.sort(key=lambda e: e.inserted_at)
-
-    if not run:
+    agent_run = session.get(AgentRun, id)
+    if not agent_run:
         raise HTTPException(status_code=404, detail="Run not found")
-    return run
+    agent_run.events.sort(key=lambda e: e.inserted_at)
+    return agent_run

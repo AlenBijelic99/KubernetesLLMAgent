@@ -1,107 +1,69 @@
-import {
-  Container,
-  Flex,
-  Heading,
-  Skeleton,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-
+import { Search } from "lucide-react"
 import { Suspense } from "react"
-import { ErrorBoundary } from "react-error-boundary"
-import { ItemsService } from "../../client"
-import ActionsMenu from "../../components/Common/ActionsMenu"
-import Navbar from "../../components/Common/Navbar"
+
+import { ItemsService } from "@/client"
+import { DataTable } from "@/components/Common/DataTable"
+import AddItem from "@/components/Items/AddItem"
+import { columns } from "@/components/Items/columns"
+import PendingItems from "@/components/Pending/PendingItems"
+
+function getItemsQueryOptions() {
+  return {
+    queryFn: () => ItemsService.readItems({ skip: 0, limit: 100 }),
+    queryKey: ["items"],
+  }
+}
 
 export const Route = createFileRoute("/_layout/items")({
   component: Items,
+  head: () => ({
+    meta: [
+      {
+        title: "Items - FastAPI Cloud",
+      },
+    ],
+  }),
 })
 
-function ItemsTableBody() {
-  const { data: items } = useSuspenseQuery({
-    queryKey: ["items"],
-    queryFn: () => ItemsService.readItems({}),
-  })
+function ItemsTableContent() {
+  const { data: items } = useSuspenseQuery(getItemsQueryOptions())
 
-  return (
-    <Tbody>
-      {items.data.map((item) => (
-        <Tr key={item.id}>
-          <Td>{item.id}</Td>
-          <Td>{item.title}</Td>
-          <Td color={!item.description ? "ui.dim" : "inherit"}>
-            {item.description || "N/A"}
-          </Td>
-          <Td>
-            <ActionsMenu type={"Item"} value={item} />
-          </Td>
-        </Tr>
-      ))}
-    </Tbody>
-  )
+  if (items.data.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-12">
+        <div className="rounded-full bg-muted p-4 mb-4">
+          <Search className="h-8 w-8 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold">You don't have any items yet</h3>
+        <p className="text-muted-foreground">Add a new item to get started</p>
+      </div>
+    )
+  }
+
+  return <DataTable columns={columns} data={items.data} />
 }
+
 function ItemsTable() {
   return (
-    <TableContainer>
-      <Table size={{ base: "sm", md: "md" }}>
-        <Thead>
-          <Tr>
-            <Th>ID</Th>
-            <Th>Title</Th>
-            <Th>Description</Th>
-            <Th>Actions</Th>
-          </Tr>
-        </Thead>
-        <ErrorBoundary
-          fallbackRender={({ error }) => (
-            <Tbody>
-              <Tr>
-                <Td colSpan={4}>Something went wrong: {error.message}</Td>
-              </Tr>
-            </Tbody>
-          )}
-        >
-          <Suspense
-            fallback={
-              <Tbody>
-                {new Array(5).fill(null).map((_, index) => (
-                  <Tr key={index}>
-                    {new Array(4).fill(null).map((_, index) => (
-                      <Td key={index}>
-                        <Flex>
-                          <Skeleton height="20px" width="20px" />
-                        </Flex>
-                      </Td>
-                    ))}
-                  </Tr>
-                ))}
-              </Tbody>
-            }
-          >
-            <ItemsTableBody />
-          </Suspense>
-        </ErrorBoundary>
-      </Table>
-    </TableContainer>
+    <Suspense fallback={<PendingItems />}>
+      <ItemsTableContent />
+    </Suspense>
   )
 }
 
 function Items() {
   return (
-    <Container maxW="full">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} pt={12}>
-        Items Management
-      </Heading>
-
-      <Navbar type={"Item"} />
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Items</h1>
+          <p className="text-muted-foreground">Create and manage your items</p>
+        </div>
+        <AddItem />
+      </div>
       <ItemsTable />
-    </Container>
+    </div>
   )
 }

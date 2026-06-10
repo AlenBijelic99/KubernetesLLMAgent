@@ -1,20 +1,22 @@
-# Either agent can decide to end
 from typing import Literal
 
+from app.monitoring_agent.state import AgentState
 
-def router(state) -> Literal["call_tool", "__end__", "continue"]:
-    """
-    The router function that decides which node to go to next based on the current state.
 
-    Note: Sometime the LLM uses keywords that indicates we should continue with a keyword to end the conversation. That
-    is why we check for those keywords.
+def router(state: AgentState) -> Literal["call_tool", "__end__", "continue"]:
     """
-    messages = state["messages"]
-    last_message = messages[-1]
-    if last_message.tool_calls:
+    Decides which node to go to next based on the current state.
+
+    The agents are instructed to end their reports with control keywords
+    (DIAGNOSTIC NEEDED, GENERATE SOLUTIONS, UNSUCCESSFUL, FINISHED), which
+    are used here to route the workflow.
+    """
+    last_message = state["messages"][-1]
+    if getattr(last_message, "tool_calls", None):
         return "call_tool"
-    elif "DIAGNOSTIC NEEDED" in last_message.content or "GENERATE SOLUTIONS" in last_message.content:
+    content = str(last_message.content)
+    if "DIAGNOSTIC NEEDED" in content or "GENERATE SOLUTIONS" in content:
         return "continue"
-    if "UNSUCCESSFUL" in last_message.content or "FINISHED" in last_message.content:
+    if "UNSUCCESSFUL" in content or "FINISHED" in content:
         return "__end__"
     return "continue"

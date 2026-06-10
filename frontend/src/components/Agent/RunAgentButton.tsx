@@ -1,56 +1,35 @@
-import { AgentService } from "../../client";
-import {Button, useToast} from "@chakra-ui/react";
+import { useQueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
+
+import { AgentService } from "@/client"
+import { Button } from "@/components/ui/button"
 
 const RunAgentButton = () => {
-    const toast = useToast();
+  const queryClient = useQueryClient()
 
-    const handleClick = async () => {
-        const agentPromise = AgentService.runAgent();
+  const handleClick = () => {
+    const promise = AgentService.runAgent().finally(() => {
+      queryClient.invalidateQueries({ queryKey: ["agent-runs"] })
+      queryClient.invalidateQueries({ queryKey: ["agent-run"] })
+    })
 
-        toast.promise(agentPromise, {
-            loading: {
-                title: "Running Agent",
-                description: "Please wait while the agent is running...",
-            },
-            success: {
-                title: "Success",
-                description: "Agent ran successfully",
-                duration: 5000,
-                isClosable: true,
-            },
-            error: {
-                title: "Error",
-                description: "An unexpected error occurred.",
-                duration: 5000,
-                isClosable: true,
-            },
-        });
-
-        try {
-            await agentPromise;
-        } catch (error: any) {
-            let errorMessage = error.response?.data?.message;
-            if (error.response && error.response.status === 429) {
-                errorMessage = "You exceeded your current quota, please check your plan and billing details.";
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-
-            toast({
-                title: "Error",
-                description: errorMessage,
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
+    toast.promise(promise, {
+      loading: "Running agent, please wait...",
+      success: "Agent ran successfully",
+      error: (error: any) => {
+        if (error?.status === 429) {
+          return "You exceeded your current quota, please check your plan and billing details."
         }
-    };
+        return (
+          error?.body?.detail ||
+          error?.message ||
+          "An unexpected error occurred."
+        )
+      },
+    })
+  }
 
-    return (
-        <Button colorScheme="teal" onClick={handleClick}>
-            Run Agent
-        </Button>
-    );
-};
+  return <Button onClick={handleClick}>Run Agent</Button>
+}
 
-export default RunAgentButton;
+export default RunAgentButton

@@ -1,68 +1,66 @@
-import os
 import uuid
-from datetime import datetime
-from typing import List, Optional, Union
+from datetime import datetime, timezone
+from typing import Any
 
-import pytz
-from sqlalchemy import Column, String, JSON
-from sqlalchemy.orm import declared_attr
+from pydantic import EmailStr
+from sqlalchemy import JSON, Column, DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
-TIMEZONE = pytz.timezone(os.getenv("TIMEZONE", "Europe/Zurich"))
 
-def get_current_time():
-    return datetime.now(TIMEZONE)
+def get_datetime_utc() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 # Shared properties
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True)
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
-    full_name: str | None = None
+    full_name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on creation
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(min_length=8, max_length=128)
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserRegister(SQLModel):
-    email: str
-    password: str
-    full_name: str | None = None
+    email: EmailStr = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=128)
+    full_name: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on update, all are optional
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdate(UserBase):
-    email: str | None = None  # type: ignore
-    password: str | None = None
+    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
+    password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdateMe(SQLModel):
-    full_name: str | None = None
-    email: str | None = None
+    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = Field(default=None, max_length=255)
 
 
 class UpdatePassword(SQLModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
 
 
 # Database model, database table inferred from class name
 class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner")
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    id: int
+    id: uuid.UUID
+    created_at: datetime | None = None
 
 
 class UsersPublic(SQLModel):
@@ -72,32 +70,38 @@ class UsersPublic(SQLModel):
 
 # Shared properties
 class ItemBase(SQLModel):
-    title: str
-    description: str | None = None
+    title: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
 
 
 # Properties to receive on item creation
 class ItemCreate(ItemBase):
-    title: str
+    pass
 
 
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
-    title: str | None = None  # type: ignore
+    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
 # Database model, database table inferred from class name
 class Item(ItemBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
-    title: str
-    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
     owner: User | None = Relationship(back_populates="items")
 
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
-    id: int
-    owner_id: int
+    id: uuid.UUID
+    owner_id: uuid.UUID
+    created_at: datetime | None = None
 
 
 class ItemsPublic(SQLModel):
@@ -118,48 +122,60 @@ class Token(SQLModel):
 
 # Contents of JWT token
 class TokenPayload(SQLModel):
-    sub: int | None = None
+    sub: str | None = None
 
 
 class NewPassword(SQLModel):
     token: str
-    new_password: str
+    new_password: str = Field(min_length=8, max_length=128)
 
 
+# Shared properties of a monitoring agent execution
 class AgentRunBase(SQLModel):
-    start_time: datetime = Field(default_factory=get_current_time)
-    status: str
+    start_time: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    status: str = Field(max_length=32)
 
 
-class EventBase(SQLModel):
-    event_data: dict = Field(sa_column=Column(JSON), default={})
-    inserted_at: datetime = Field(default_factory=get_current_time)
-    run_id: Optional[uuid.UUID] = Field(default=None, foreign_key="agentrun.id")
-
-
-class Event(EventBase, table=True):
-    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
-    run: Optional["AgentRun"] = Relationship(back_populates="events")
-
-
+# Database model, database table inferred from class name
 class AgentRun(AgentRunBase, table=True):
-    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
-    events: List[Event] = Relationship(back_populates="run")
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    events: list["Event"] = Relationship(back_populates="run", cascade_delete=True)
 
 
-class AgentRunAndEventsPublic(SQLModel):
+# Event emitted during an agent run (LLM message, tool call/result or error)
+class Event(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    event_data: dict[str, Any] = Field(default_factory=dict, sa_column=Column(JSON))
+    inserted_at: datetime = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    run_id: uuid.UUID = Field(
+        foreign_key="agentrun.id", nullable=False, ondelete="CASCADE"
+    )
+    run: AgentRun | None = Relationship(back_populates="events")
+
+
+# Properties to return via API
+class EventPublic(SQLModel):
     id: uuid.UUID
-    start_time: datetime
-    status: str
-    events: List[Event]
+    event_data: dict[str, Any]
+    inserted_at: datetime
+    run_id: uuid.UUID
 
 
-class AgentRunPublic(SQLModel):
+class AgentRunPublic(AgentRunBase):
     id: uuid.UUID
-    start_time: datetime
-    status: str
 
 
 class AgentRunsPublic(SQLModel):
-    data: List[AgentRunPublic]
+    data: list[AgentRunPublic]
     count: int
+
+
+class AgentRunAndEventsPublic(AgentRunBase):
+    id: uuid.UUID
+    events: list[EventPublic]

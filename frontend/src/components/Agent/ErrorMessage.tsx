@@ -1,35 +1,18 @@
-import { Box, Text, Heading, useColorMode } from "@chakra-ui/react";
-
 interface ErrorMessageProps {
-    message: any;
+  error: string
 }
 
-const ErrorMessage = ({ message }: ErrorMessageProps) => {
-    const { colorMode } = useColorMode();
+const ErrorMessage = ({ error }: ErrorMessageProps) => {
+  if (!error) return null
 
-    return (
-        <Box
-            border="1px"
-            borderColor={colorMode === "dark" ? "red.300" : "red.500"}
-            borderRadius="md"
-            p={4}
-            my={2}
-            bg={colorMode === "dark" ? "gray.700" : "gray.100"}
-            shadow="md"
-        >
-            {message.content !== "" && (
-                <>
-                    <Text fontSize='sm'>{message.response_metadata.model_name}</Text>
-                    <Heading as="h3" size="md" mb={2} color={colorMode === "dark" ? "red.300" : "red.700"}>
-                        Error
-                    </Heading>
-                    <Text fontSize='md' mb={4} p={2} bg={colorMode === "dark" ? "gray.800" : "white"} borderRadius="md">
-                        {message.content}
-                    </Text>
-                </>
-            )}
-        </Box>
-    );
-};
+  return (
+    <div className="rounded-md border border-destructive/60 bg-muted/50 p-4 my-2 shadow-sm">
+      <h3 className="text-sm font-semibold text-destructive mb-2">Error</h3>
+      <p className="whitespace-pre-wrap break-words rounded-md bg-background p-2 text-sm">
+        {error}
+      </p>
+    </div>
+  )
+}
 
-export default ErrorMessage;
+export default ErrorMessage

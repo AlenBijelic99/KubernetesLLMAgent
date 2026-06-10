@@ -1,37 +1,41 @@
 import logging
-from typing import List, Any
+from typing import Any
 
 from fastapi import WebSocket
 
 
 class ConnectionManager:
-    def __init__(self):
-        self.active_connections: List[WebSocket] = []
-        self.current_run_json: List[dict] = []
+    """Broadcasts agent run events to all connected websocket clients.
 
-    async def connect(self, websocket: WebSocket):
+    Events of the run in progress are buffered so that clients connecting
+    mid-run receive the events emitted before they joined.
+    """
+
+    def __init__(self) -> None:
+        self.active_connections: list[WebSocket] = []
+        self.current_run_json: list[Any] = []
+
+    async def connect(self, websocket: WebSocket) -> None:
         await websocket.accept()
         self.active_connections.append(websocket)
-        if self.current_run_json:
-            logging.warning(f"Sending current run json: {self.current_run_json}")
-            for message in self.current_run_json:
-                await websocket.send_json(message)
+        for message in self.current_run_json:
+            await websocket.send_json(message)
 
-    def disconnect(self, websocket: WebSocket):
+    def disconnect(self, websocket: WebSocket) -> None:
         self.active_connections.remove(websocket)
 
-    async def send_json(self, message: Any):
-        logging.warning(f"Sent message: {message}")
+    async def send_json(self, message: Any) -> None:
+        logging.debug("Broadcasting message: %s", message)
+        self.current_run_json.append(message)
         for connection in self.active_connections:
-            self.current_run_json.append(message)
             await connection.send_json(message)
 
-    async def send_text(self, message: str):
-        logging.warning(f"Sent message: {message}")
+    async def send_text(self, message: str) -> None:
+        logging.debug("Broadcasting message: %s", message)
         for connection in self.active_connections:
             await connection.send_text(message)
 
-    def delete_current_run_json(self):
+    def delete_current_run_json(self) -> None:
         self.current_run_json = []
 
 

@@ -1,10 +1,13 @@
 import json
+from typing import Any
 
-from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 
 class LangchainJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (HumanMessage, AIMessage, ToolMessage)):
-            return obj.__dict__
-        return json.JSONEncoder.default(self, obj)
+    """Serializes LangChain message objects to plain dictionaries."""
+
+    def default(self, o: Any) -> Any:
+        if isinstance(o, HumanMessage | AIMessage | ToolMessage):
+            return o.model_dump()
+        return json.JSONEncoder.default(self, o)

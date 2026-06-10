@@ -1,4 +1,10 @@
-.vscode
-.idea
+.vscode/*
+!.vscode/extensions.json
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
+# Local environment with real secrets (use .env.example as a starting point)
 .env

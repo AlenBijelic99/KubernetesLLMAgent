@@ -1,73 +1,91 @@
 import functools
-import os
+from collections.abc import Callable
+from typing import Any
 
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import AIMessage
+from langchain_core.runnables import Runnable
+from langchain_core.tools import BaseTool
 
 from app.monitoring_agent.agent import create_agent
 from app.monitoring_agent.llm import get_llm
 from app.monitoring_agent.prompts import tasks_config
-from app.monitoring_agent.tools.kubernetes_tool import get_pod_names, get_pod_logs, get_nodes_resources, get_pod_yaml, \
-    get_pod_resources
+from app.monitoring_agent.state import AgentState
+from app.monitoring_agent.tools.kubernetes_tool import (
+    get_nodes_resources,
+    get_pod_logs,
+    get_pod_names,
+    get_pod_resources,
+    get_pod_yaml,
+)
 from app.monitoring_agent.tools.prometheus_tool import execute_prometheus_query
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
 
-
-def parse_config(config):
+def parse_config(config: dict[str, Any]) -> str:
     """
-    Helper function to parse the configuration for the system message.
+    Helper function to parse the task configuration into a system message.
     """
-    return f"role: {config['role']}, goal: {config['goal']}, backstory: {config['backstory']}, description: {config['description']}, expected_output: {config['expected_output']}, examples: {config['examples']}"
+    return (
+        f"role: {config['role']}, goal: {config['goal']}, "
+        f"backstory: {config['backstory']}, description: {config['description']}, "
+        f"expected_output: {config['expected_output']}, examples: {config['examples']}"
+    )
 
 
-def agent_node(state, agent, name):
+def agent_node(state: AgentState, agent: Runnable[Any, Any], name: str) -> dict[str, Any]:
     """
     Helper function to create a node for a given agent.
     """
     result = agent.invoke(state)
-    # We convert the agent output into a format that is suitable to append to the global state
-    if isinstance(result, ToolMessage):
-        pass
-    else:
-        result = AIMessage(**result.dict(exclude={"type", "name"}), name=name)
+    # Tag the message with the node name so the workflow (and the frontend)
+    # knows which agent produced it.
+    if isinstance(result, AIMessage):
+        result = result.model_copy(update={"name": name})
     return {
         "messages": [result],
-        # Since we have a strict workflow, we can track the sender so we know who to pass to next.
+        # Since we have a strict workflow, we can track the sender so we know
+        # who to pass to next.
         "sender": name,
     }
 
 
-# Define the tools available for each agent
-metric_analyser_tools = [get_pod_names, execute_prometheus_query, get_pod_resources, get_nodes_resources]
-diagnostic_tools = [execute_prometheus_query, get_pod_logs, get_pod_yaml, get_pod_resources]
-solution_tools = []
-incident_tools = []
+# Tools available for each agent node. Tool execution itself happens in the
+# shared "call_tool" ToolNode of the graph.
+NODE_TOOLS: dict[str, list[BaseTool]] = {
+    "metric_analyser": [
+        get_pod_names,
+        execute_prometheus_query,
+        get_pod_resources,
+        get_nodes_resources,
+    ],
+    "diagnostic": [
+        execute_prometheus_query,
+        get_pod_logs,
+        get_pod_yaml,
+        get_pod_resources,
+    ],
+    "solution": [],
+    "incident_reporter": [],
+}
 
-# Create an agent for each task
-metric_analyser_agent = create_agent(
-    get_llm(metric_analyser_tools),
-    metric_analyser_tools,
-    system_message=parse_config(tasks_config["analyse_metric_task"]),
-)
-metric_analyser_node = functools.partial(agent_node, agent=metric_analyser_agent, name="metric_analyser")
+_NODE_TASKS = {
+    "metric_analyser": "analyse_metric_task",
+    "diagnostic": "diagnose_issue_task",
+    "solution": "provide_solution_task",
+    "incident_reporter": "report_incident_task",
+}
 
-diagnostic_agent = create_agent(
-    get_llm(diagnostic_tools),
-    diagnostic_tools,
-    system_message=parse_config(tasks_config["diagnose_issue_task"]),
-)
-diagnostic_node = functools.partial(agent_node, agent=diagnostic_agent, name="diagnostic")
 
-solution_agent = create_agent(
-    get_llm(solution_tools),
-    solution_tools,
-    system_message=parse_config(tasks_config["provide_solution_task"]),
-)
-solution_node = functools.partial(agent_node, agent=solution_agent, name="solution")
+def make_agent_node(name: str) -> Callable[..., dict[str, Any]]:
+    """
+    Build the graph node for the given agent name.
 
-incident_reporter_agent = create_agent(
-    get_llm(incident_tools),
-    incident_tools,
-    system_message=parse_config(tasks_config["report_incident_task"]),
-)
-incident_reporter_node = functools.partial(agent_node, agent=incident_reporter_agent, name="incident_reporter")
+    Agents are created lazily (at graph construction time) instead of at
+    import time, so importing this module does not require LLM credentials.
+    """
+    tools = NODE_TOOLS[name]
+    agent = create_agent(
+        get_llm(),
+        tools,
+        system_message=parse_config(tasks_config[_NODE_TASKS[name]]),
+    )
+    return functools.partial(agent_node, agent=agent, name=name)

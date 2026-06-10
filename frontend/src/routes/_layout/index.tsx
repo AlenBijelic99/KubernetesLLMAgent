@@ -1,194 +1,107 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-    Box,
-    Container,
-    Drawer,
-    DrawerBody,
-    DrawerCloseButton,
-    DrawerContent,
-    DrawerHeader,
-    DrawerOverlay,
-    Grid,
-    GridItem, Spinner,
-    Text,
-    useDisclosure,
-    useToast,
-} from "@chakra-ui/react";
-import {createFileRoute, useNavigate} from "@tanstack/react-router";
-import useAuth from "../../hooks/useAuth";
-import {
-    AgentRunAndEventsPublic,
-    AgentRunPublic,
-    AgentService,
-    WebsocketService,
-} from "../../client";
-import RunAgentStepper from "../../components/Agent/RunAgentStepper";
-import RunAgentButton from "../../components/Agent/RunAgentButton";
-import RunsTable from "../../components/Agent/RunsTable";
-import {Icon} from "@chakra-ui/icons";
-import {MdCheckCircleOutline, MdOutlineErrorOutline} from "react-icons/md";
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { toast } from "sonner"
 
-type Run = {
-    uuid: string;
+import { AgentService } from "@/client"
+import RunAgentButton from "@/components/Agent/RunAgentButton"
+import RunAgentStepper from "@/components/Agent/RunAgentStepper"
+import RunStatusIcon from "@/components/Agent/RunStatusIcon"
+import RunsTable from "@/components/Agent/RunsTable"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { useAgentWebSocket } from "@/hooks/useAgentWebSocket"
+import useAuth from "@/hooks/useAuth"
+
+type DashboardSearch = {
+  run?: string
 }
 
 export const Route = createFileRoute("/_layout/")({
-    component: Dashboard,
-    validateSearch: (search: Record<string, unknown>): Run => {
-        return {
-            uuid: search.run as string,
-        };
-    }
-});
+  component: Dashboard,
+  validateSearch: (search: Record<string, unknown>): DashboardSearch => ({
+    run: typeof search.run === "string" ? search.run : undefined,
+  }),
+  head: () => ({
+    meta: [
+      {
+        title: "Dashboard - Kubernetes AI Agent",
+      },
+    ],
+  }),
+})
 
 function Dashboard() {
-    const { user: currentUser } = useAuth();
-    const { uuid } = Route.useSearch();
-    const [runs, setRuns] = useState<AgentRunPublic[]>([]);
-    const [selectedRun, setSelectedRun] = useState<AgentRunAndEventsPublic | null>(null);
-    const [, setStatus] = useState<any[]>([]);
-    const socketRef = useRef<WebSocket | null>(null);
-    const toast = useToast();
-    const { isOpen, onOpen, onClose: drawerOnClose } = useDisclosure();
-    const navigate = useNavigate();
+  const { user: currentUser } = useAuth()
+  const { run: selectedRunId } = Route.useSearch()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-    const onClose = () => {
-        drawerOnClose();
-        setSelectedRun(null);
-        navigate({ to: "/", search: ""});
-    };
+  const { data: runs } = useQuery({
+    queryKey: ["agent-runs"],
+    queryFn: () => AgentService.getRuns(),
+  })
 
-    const fetchRuns = useCallback(async () => {
-        try {
-            const data = await AgentService.getAgentRuns();
-            setRuns(data.data);
-        } catch (error) {
-            console.error("Failed to fetch agent runs", error);
-        }
-    }, []);
+  const { data: selectedRun } = useQuery({
+    queryKey: ["agent-run", selectedRunId],
+    queryFn: () => AgentService.getRun({ id: selectedRunId! }),
+    enabled: !!selectedRunId,
+  })
 
-    const fetchRunById = useCallback(async (id: string) => {
-        try {
-            const data = await AgentService.getAgentRunById(id);
-            setSelectedRun(data);
-            onOpen();
-        } catch (error) {
-            console.error("Failed to fetch agent run", error);
-        }
-    }, [onOpen]);
+  // Events are persisted before being broadcast, so refetching on every
+  // websocket message keeps the runs list and the open run detail live.
+  useAgentWebSocket((message) => {
+    if (message && typeof message === "object" && "error" in message) {
+      toast.error(`Agent run failed: ${(message as { error: string }).error}`)
+    }
+    queryClient.invalidateQueries({ queryKey: ["agent-runs"] })
+    queryClient.invalidateQueries({ queryKey: ["agent-run"] })
+  })
 
-    useEffect(() => {
-        fetchRuns();
-    }, [fetchRuns]);
+  const closeRunDetails = () => {
+    navigate({ to: "/", search: {} })
+  }
 
-    useEffect(() => {
-        if (uuid) {
-            fetchRunById(uuid);
-        }
-    }, [uuid, fetchRunById]);
-
-    useEffect(() => {
-        const socket = WebsocketService.getWebSocket();
-        socketRef.current = socket;
-
-        socket.onopen = () => {
-            console.log("WebSocket connection opened.");
-        };
-
-        socket.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                console.log("Received message:", message);
-
-                // Check if the message is a new run
-                if (message.type === 'new_run') {
-                    setRuns((prevRuns) => [...prevRuns, message.run]);
-                    setSelectedRun(message.run);
-                    onOpen();
-                } else {
-                    // Handle other types of messages
-                    setStatus((prevStatus) => [...prevStatus, message]);
-                }
-            } catch (error) {
-                console.error("Error parsing JSON:", error);
-            }
-        };
-
-        socket.onerror = (event) => {
-            let errorMessage = "An error occurred with the WebSocket connection";
-            if (event instanceof ErrorEvent) {
-                errorMessage = event.message;
-            }
-            toast({
-                title: "WebSocket Error",
-                description: errorMessage,
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-        };
-
-        socket.onclose = () => {
-            toast({
-                title: "WebSocket Closed",
-                description: "WebSocket connection was closed.",
-                status: "warning",
-                duration: 5000,
-                isClosable: true,
-            });
-        };
-
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.close();
-            }
-        };
-    }, [toast, onOpen]);
-
-    const handleSelectRun = useCallback(async (run: AgentRunPublic) => {
-        try {
-            const data = await AgentService.getAgentRunById(run.id);
-            setSelectedRun(data);
-            onOpen();
-        } catch (error) {
-            console.error("Failed to fetch agent run", error);
-        }
-    }, [onOpen]);
-
-    return (
-        <Container maxW="full">
-            <Box pt={12} m={4}>
-                <Text fontSize="2xl">
-                    Hi, {currentUser?.full_name || currentUser?.email} 👋🏼
-                </Text>
-                <Text>Welcome back, nice to see you again!</Text>
-                <RunAgentButton />
-                <Grid templateColumns="repeat(5, 1fr)" gap={4} mt={4}>
-                    <GridItem w="100%" colSpan={5}>
-                        <RunsTable runs={runs} onSelectRun={handleSelectRun} selectedRun={selectedRun} />
-                    </GridItem>
-                </Grid>
-            </Box>
-            <Drawer isOpen={isOpen} placement="right" onClose={onClose} size="xl">
-                <DrawerOverlay />
-                <DrawerContent>
-                    <DrawerCloseButton />
-                    <DrawerHeader>
-                        {selectedRun?.status === 'failed' ? (
-                            <Icon as={MdOutlineErrorOutline} boxSize={5} color='red.500' />
-                        ) : selectedRun?.status === 'running' ? (
-                            <Spinner color='blue.500' size='sm'/>
-                        ) : (
-                            <Icon as={MdCheckCircleOutline} boxSize={5} color='green.500' />
-                        )}
-                    </DrawerHeader>
-                    <DrawerBody>
-                        {selectedRun && <RunAgentStepper run={selectedRun} />}
-                    </DrawerBody>
-                </DrawerContent>
-            </Drawer>
-        </Container>
-    );
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl truncate max-w-sm">
+            Hi, {currentUser?.full_name || currentUser?.email} 👋
+          </h1>
+          <p className="text-muted-foreground">
+            Welcome back, nice to see you again!
+          </p>
+        </div>
+        <RunAgentButton />
+      </div>
+      <RunsTable runs={runs?.data ?? []} selectedRunId={selectedRunId} />
+      <Sheet
+        open={!!selectedRunId}
+        onOpenChange={(open) => {
+          if (!open) closeRunDetails()
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="w-full overflow-y-auto sm:max-w-xl"
+        >
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              {selectedRun && <RunStatusIcon status={selectedRun.status} />}
+              Agent Run Details
+            </SheetTitle>
+          </SheetHeader>
+          <div className="px-4 pb-8">
+            {selectedRun && (
+              <RunAgentStepper key={selectedRun.id} run={selectedRun} />
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
+  )
 }
-
-export default Dashboard;

@@ -1,46 +1,29 @@
-import { Box, Code, Text, Stack, Divider, useColorMode } from "@chakra-ui/react";
+import { Separator } from "@/components/ui/separator"
+import { type LLMMessage, messageText } from "@/lib/agent-types"
 
 interface ToolMessageProps {
-    message: any;
+  message: LLMMessage
 }
 
 const ToolMessage = ({ message }: ToolMessageProps) => {
-    const parseToolCalls = (content: string) => {
-        return content.split("\n");
-    };
+  const lines = messageText(message.content).split("\n")
 
-    const { colorMode } = useColorMode();
+  return (
+    <div className="rounded-md border border-chart-3/50 bg-muted/50 p-4 my-2 shadow-sm">
+      <p className="text-sm font-bold text-chart-3">{message.name}</p>
+      <Separator className="my-2" />
+      <div className="flex flex-col gap-1">
+        {lines.map((line, index) => (
+          <code
+            key={index}
+            className="block whitespace-pre-wrap break-all rounded-md bg-background p-2 text-xs"
+          >
+            {line}
+          </code>
+        ))}
+      </div>
+    </div>
+  )
+}
 
-    return (
-        <Box
-            border="1px"
-            borderColor={colorMode === "dark" ? "blue.300" : "blue.500"}
-            borderRadius="md"
-            p={4}
-            my={2}
-            bg={colorMode === "dark" ? "gray.700" : "gray.100"}
-            shadow="md"
-        >
-            <Text fontWeight="bold" fontSize="lg" mb={2} color={colorMode === "dark" ? "blue.300" : "blue.700"}>
-                {message.name}
-            </Text>
-            <Divider my={2} />
-            <Stack spacing={2}>
-                {parseToolCalls(message.content).map((line: string, index: number) => (
-                    <Code
-                        key={index}
-                        p={2}
-                        borderRadius="md"
-                        bg={colorMode === "dark" ? "gray.800" : "white"}
-                        display="block"
-                        whiteSpace="pre-wrap"
-                    >
-                        {line}
-                    </Code>
-                ))}
-            </Stack>
-        </Box>
-    );
-};
-
-export default ToolMessage;
+export default ToolMessage
