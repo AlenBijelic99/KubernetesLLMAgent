@@ -1,10 +1,17 @@
+import jwt
 import sentry_sdk
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.routing import APIRoute
+from jwt.exceptions import InvalidTokenError
+from pydantic import ValidationError
+from sqlmodel import Session
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
+from app.core import security
 from app.core.config import settings
+from app.core.db import engine
+from app.models import TokenPayload, User
 from app.websocket.websocket import manager
 
 
@@ -32,8 +39,29 @@ if settings.all_cors_origins:
     )
 
 
+def _authenticate_websocket_token(token: str) -> bool:
+    """Validate the access token of a websocket client.
+
+    Websockets cannot send an Authorization header from the browser, so the
+    token is passed as a query parameter instead.
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (InvalidTokenError, ValidationError):
+        return False
+    with Session(engine) as session:
+        user = session.get(User, token_data.sub)
+    return user is not None and user.is_active
+
+
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket) -> None:
+async def websocket_endpoint(websocket: WebSocket, token: str = "") -> None:
+    if not _authenticate_websocket_token(token):
+        await websocket.close(code=1008)
+        return
     await manager.connect(websocket)
     try:
         while True:

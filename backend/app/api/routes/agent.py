@@ -24,9 +24,9 @@ async def run_agent(session: SessionDep, current_user: CurrentUser) -> Any:
     logging.info("Agent run %s created", agent_run.id)
     try:
         await run(manager, session, agent_run.id)
-    except Exception as e:
+    except Exception:
         logging.exception("Agent run %s failed", agent_run.id)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Agent run failed")
     return Message(message="Agent run finished successfully")
 
 
