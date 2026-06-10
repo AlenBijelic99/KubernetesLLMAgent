@@ -1,5 +1,5 @@
 import { Check, ChevronDown, ChevronUp, CircleMinus } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import type { AgentRunAndEventsPublic, EventPublic } from "@/client"
 import AIMessage from "@/components/Agent/AIMessage"
@@ -82,14 +82,11 @@ const EventMessages = ({ event }: { event: EventPublic }) => {
   )
 }
 
+// NOTE: render with key={run.id} so the expanded state resets when
+// another run is selected.
 const RunAgentStepper = ({ run }: RunAgentStepperProps) => {
   const eventGroups = groupEvents(run.events)
   const [expandedSteps, setExpandedSteps] = useState<string[]>([])
-
-  useEffect(() => {
-    // Reset expanded steps when another run is selected
-    setExpandedSteps([])
-  }, [])
 
   const toggleExpand = (key: string) => {
     setExpandedSteps((prev) =>

@@ -96,7 +96,9 @@ function Dashboard() {
             </SheetTitle>
           </SheetHeader>
           <div className="px-4 pb-8">
-            {selectedRun && <RunAgentStepper run={selectedRun} />}
+            {selectedRun && (
+              <RunAgentStepper key={selectedRun.id} run={selectedRun} />
+            )}
           </div>
         </SheetContent>
       </Sheet>
